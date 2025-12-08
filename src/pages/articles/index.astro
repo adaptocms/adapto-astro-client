@@ -1,0 +1,41 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+export const prerender = true;
+export const showInNav = true;
+
+const articles = await getCollection("articles");
+const pageTitle = "Articles Page";
+---
+
+<Layout pageTitle={pageTitle}>
+  <h1>Posts from External API (SSG)</h1>
+
+  <p>
+    This page was generated at build time using the Inline Loader function.
+    Total posts found: {articles.length}.
+  </p>
+
+  <ul style={{ listStyle: "none", padding: 0 }}>
+    {
+      articles.map((article) => (
+        <li
+          style={{
+            border: "1px solid #ccc",
+            padding: "15px",
+            marginBottom: "10px",
+            borderRadius: "5px",
+          }}
+        >
+          <h2>{article.data.title}</h2>
+
+          <p style={{ fontStyle: "italic", fontSize: "0.9em" }}>
+            {article.data.body.substring(0, 50)}...
+          </p>
+          <a href={`/articles/${article.id}`}>Read More</a>
+        </li>
+      ))
+    }
+  </ul>
+</Layout>
