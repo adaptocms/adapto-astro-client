@@ -1,0 +1,91 @@
+---
+const { page } = Astro.props;
+
+const isFirstPage = page.currentPage === 1;
+const isLastPage = page.currentPage === page.lastPage;
+
+const startItem = page.start + 1;
+const endItem = page.end + 1;
+---
+
+<nav class="pagination-nav">
+  <div class="links">
+    {/* Previous Link */}
+    {
+      isFirstPage ? (
+        <span class="disabled-link prev-link">← Newer</span>
+      ) : (
+        <a href={page.url.prev!} class="prev-link">
+          ← Newer
+        </a>
+      )
+    }
+
+    {/* Current Page Number Display */}
+    <span class="current-page">
+      {page.currentPage}
+    </span>
+
+    {/* Next Link */}
+    {
+      isLastPage ? (
+        // If it's the last page, display the disabled state
+        <span class="disabled-link next-link">Older →</span>
+      ) : (
+        // Otherwise, display the active link using page.url.next
+        <a href={page.url.next!} class="next-link">
+          Older →
+        </a>
+      )
+    }
+  </div>
+</nav>
+
+<style>
+  .pagination-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+  .summary {
+    font-size: 0.95rem;
+    color: #555;
+    font-weight: bold;
+  }
+  .total-count {
+    font-weight: normal;
+    font-size: 0.85rem;
+    color: #888;
+  }
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .current-page {
+    font-weight: bold;
+    color: #333;
+    padding: 0 5px;
+  }
+  a {
+    padding: 6px 12px;
+    border: 1px solid #0056b3;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  a:hover {
+    background-color: #e6f7ff;
+  }
+  .disabled-link {
+    color: #bbb;
+    padding: 6px 12px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: default;
+  }
+</style>

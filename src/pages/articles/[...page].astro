@@ -1,0 +1,49 @@
+---
+import { getCollection } from "astro:content";
+import type { GetStaticPathsOptions } from "astro";
+import Layout from "../../layouts/Layout.astro";
+import Pagination from "../../components/Pagination.astro";
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const articles = await getCollection("articles");
+  const sortedArticles = articles.sort((a, b) => Number(a.id) - Number(b.id));
+  return paginate(sortedArticles, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+
+const pageTitle = `Articles Page ${page.currentPage}`;
+---
+
+<Layout pageTitle={pageTitle}>
+  <h1>Posts from External API (SSG)</h1>
+
+  <p>
+    This page was generated at build time using the Inline Loader function.
+    Total posts found: {page.total}.
+  </p>
+
+  <ul style={{ listStyle: "none", padding: 0 }}>
+    {
+      page.data.map((article) => (
+        <li
+          style={{
+            border: "1px solid #ccc",
+            padding: "15px",
+            marginBottom: "10px",
+            borderRadius: "5px",
+          }}
+        >
+          <h2>{article.data.title}</h2>
+
+          <p style={{ fontStyle: "italic", fontSize: "0.9em" }}>
+            {article.data.body.substring(0, 50)}...
+          </p>
+          <a href={`/articles/${article.data.slug}`}>Read More</a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <Pagination page={page} baseRoute="articles" />
+</Layout>

@@ -1,0 +1,20 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+// const categories = await getCollection("categories");
+const pageTitle = "Categories";
+---
+
+<Layout pageTitle={pageTitle}>
+  <!-- <ul>
+    {
+      categories.map((category) => (
+        <li>
+          <h2>{category.data.name}</h2>
+          <p>{category.data.description}</p>
+        </li>
+      ))
+    }
+  </ul> -->
+</Layout>
