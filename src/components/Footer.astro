@@ -1,15 +1,42 @@
----
+<footer class="footer">
+  <div class="footer-content">
+    <p>&copy; {new Date().getFullYear()} Adapto. All rights reserved.</p>
 
----
+    <div class="footer-links">
+      <a href="/about/">About</a>
+      <a href="/contact/">Contact</a>
+    </div>
+  </div>
+</footer>
 
 <style>
-  footer {
+  .footer {
+    width: 100%;
+    background-color: #333; /* Added background for visibility */
+    color: white;
+  }
+
+  .footer-content {
     display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* NEW: Style the container holding the links */
+  .footer-links {
+    display: flex; /* Make the links a new flex container */
+    gap: 1.5rem; /* Add small space between the links */
+    align-items: center;
+  }
+
+  .footer-content p,
+  .footer-content a {
+    margin: 0;
+    text-decoration: none;
+    color: inherit;
   }
 </style>
-
-<footer>
-  <p>&copy; {new Date().getFullYear()} Adapto. All rights reserved.</p>
-</footer>
