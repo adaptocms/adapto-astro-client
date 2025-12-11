@@ -32,5 +32,5 @@ interface IArticle {
   updated_at: string | null;
   published_at: string | null;
   media_objects_placements: IMediaObjectsPlacement[];
-  translation_of_id: string;
+  translation_of_id: string | null;
 }

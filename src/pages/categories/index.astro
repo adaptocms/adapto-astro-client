@@ -1,20 +1,33 @@
 ---
-// import { getCollection } from "astro:content";
+import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import type { CollectionEntry } from "astro:content";
 
-// const categories = await getCollection("categories");
-const pageTitle = "Categories";
+type CategoryEntry = CollectionEntry<"categories">;
+
+const categories: CategoryEntry[] = await getCollection("categories");
+const pageTitle = "Categories Page";
 ---
 
 <Layout pageTitle={pageTitle}>
-  <!-- <ul>
+  <section class="category-list">
     {
-      categories.map((category) => (
-        <li>
-          <h2>{category.data.name}</h2>
-          <p>{category.data.description}</p>
-        </li>
-      ))
+      categories.length === 0 ? (
+        <p>No categories have been defined yet. Check your CMS setup.</p>
+      ) : (
+        <ul>
+          {categories.map((category) => (
+            <li>
+              <a
+                href={`/categories/${category.data.slug}`}
+                class="category-card"
+              >
+                {category.data.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
     }
-  </ul> -->
+  </section>
 </Layout>

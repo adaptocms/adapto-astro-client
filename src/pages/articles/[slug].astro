@@ -1,8 +1,7 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 
-// Generate static paths for all products
 export async function getStaticPaths() {
   const articles = await getCollection("articles");
   return articles.map((article) => ({
@@ -12,18 +11,16 @@ export async function getStaticPaths() {
 }
 
 const { article } = Astro.props;
-
-if (!article) {
-  return Astro.redirect("/404");
-}
 ---
 
 <Layout pageTitle={article.data.title}>
   <p>
-    <strong>User ID:</strong>
-    {article.data.userId}
+    <strong>Author: </strong>
+    {article.data.author}
   </p>
-  <p style={{ fontStyle: "italic", fontSize: "0.9em" }}>
-    {article.data.body}
-  </p>
+
+  <div
+    style={{ fontStyle: "italic", fontSize: "0.9em" }}
+    set:html={article.data.content}
+  />
 </Layout>

@@ -1,0 +1,21 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const categories = await getCollection("categories");
+  return categories.map((category) => ({
+    params: { slug: category.data.slug },
+    props: { category },
+  }));
+}
+
+const { category } = Astro.props;
+---
+
+<Layout pageTitle={category.data.name}>
+  <div
+    style={{ fontStyle: "italic", fontSize: "0.9em" }}
+    set:html={category.data.description}
+  />
+</Layout>

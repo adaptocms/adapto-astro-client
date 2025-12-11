@@ -1,6 +1,6 @@
 import { z } from "astro:content";
 
-export const categorySchema = z.object({
+const categorySchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
@@ -11,3 +11,5 @@ export const categorySchema = z.object({
   updated_at: z.string(),
   translation_of_id: z.string().nullable(),
 });
+
+export { categorySchema };
