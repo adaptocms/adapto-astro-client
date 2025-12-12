@@ -13,3 +13,6 @@ const categorySchema = z.object({
 });
 
 export { categorySchema };
+
+// Type inference
+export type ICategory = z.infer<typeof categorySchema>;

@@ -14,4 +14,4 @@ const microcopySchema = z.object({
 export { microcopySchema };
 
 // Type inference
-// export type IMicrocopySchema = z.infer<typeof microcopySchema>;
+export type IMicrocopy = z.infer<typeof microcopySchema>;

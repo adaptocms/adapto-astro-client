@@ -23,4 +23,4 @@ const pageSchema = z.object({
 export { pageStatusSchema, mediaObjectsPlacementSchema, pageSchema };
 
 // Type inference
-//  type IPageSchema = z.infer<typeof pageSchema>;
+type IPageSchema = z.infer<typeof pageSchema>;

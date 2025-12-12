@@ -56,4 +56,4 @@ export {
 };
 
 // Type inference
-// export type IArticleSchema = z.infer<typeof articleSchema>;
+export type IArticle = z.infer<typeof articleSchema>;

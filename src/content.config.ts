@@ -1,8 +1,12 @@
 import { defineCollection, z } from "astro:content";
-import { articleSchema } from "./articles/schema.ts";
-import { categorySchema } from "./categories/schema.ts";
-import type { ICategory } from "./categories/types.ts";
-import { pageSchema } from "./customPages/schema.ts";
+import { articleSchema, type IArticle } from "./schemas/articles";
+import { categorySchema, type ICategory } from "./schemas/categories";
+import { pageSchema, type IPage } from "./schemas/pages";
+import { microcopySchema, type IMicrocopy } from "./schemas/microCopies";
+import {
+  customCollectionSchema,
+  type ICustomCollection,
+} from "./schemas/customCollections";
 
 const API_URL = import.meta.env.ADAPTO_API_URL;
 const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
@@ -60,15 +64,61 @@ const pagesCollection = defineCollection({
       );
     }
     const pagesResponse = await response.json();
-    return pagesResponse.items.map((page: any) => ({
+    return pagesResponse.items.map((page: IPage) => ({
       ...page,
     }));
   },
   schema: pageSchema,
 });
 
+const customCollectionsCollection = defineCollection({
+  loader: async () => {
+    const response = await fetch(`${API_URL}/public/custom-collections`, {
+      headers: {
+        "x-api-key": SECRET_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch custom collections from CMS. Status: ${response.status}`
+      );
+    }
+    const customCollectionsResponse = await response.json();
+    return customCollectionsResponse.items.map(
+      (customCollection: ICustomCollection) => ({
+        ...customCollection,
+      })
+    );
+  },
+  schema: customCollectionSchema,
+});
+
+const microCopiesCollection = defineCollection({
+  loader: async () => {
+    const response = await fetch(`${API_URL}/public/micro-copy`, {
+      headers: {
+        "x-api-key": SECRET_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch micro copies from CMS. Status: ${response.status}`
+      );
+    }
+    const microCopiesResponse = await response.json();
+    return microCopiesResponse.map((microCopy: IMicrocopy) => ({
+      ...microCopy,
+    }));
+  },
+  schema: microcopySchema,
+});
+
 export const collections = {
   articles: articlesCollection,
   categories: categoriesCollection,
   pages: pagesCollection,
+  microCopies: microCopiesCollection,
+  customCollections: customCollectionsCollection,
 };
