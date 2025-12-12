@@ -1,0 +1,9 @@
+---
+import { getCollection } from "astro:content";
+
+const { key } = Astro.props;
+const microcopies = await getCollection("microCopies");
+const microcopy = microcopies.find((m) => m.data.key === key);
+---
+
+{microcopy?.data.value || "Microcopy not found"}

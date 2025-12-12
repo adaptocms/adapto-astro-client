@@ -13,104 +13,136 @@ const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
 
 const articlesCollection = defineCollection({
   loader: async () => {
-    const response = await fetch(`${API_URL}/public/articles`, {
-      headers: {
-        "x-api-key": SECRET_KEY,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch articles from CMS. Status: ${response.status}`
-      );
+    try {
+      const response = await fetch(`${API_URL}/public/articles`, {
+        headers: {
+          "x-api-key": SECRET_KEY,
+        },
+      });
+      if (!response.ok) {
+        console.error(
+          `⚠️  Failed to fetch articles from CMS. Status: ${response.status}`
+        );
+        return [];
+      }
+      const articles = await response.json();
+      return articles.items.map((article: IArticle) => article);
+    } catch (error) {
+      console.error("⚠️ Articles fetch failed:", error);
+      return [];
     }
-    const articles = await response.json();
-    return articles.items.map((article: IArticle) => article);
   },
   schema: articleSchema,
 });
 
 const categoriesCollection = defineCollection({
   loader: async () => {
-    const response = await fetch(`${API_URL}/public/categories`, {
-      headers: {
-        "x-api-key": SECRET_KEY,
-      },
-    });
+    try {
+      const response = await fetch(`${API_URL}/public/categories`, {
+        headers: {
+          "x-api-key": SECRET_KEY,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch categories from CMS. Status: ${response.status}`
-      );
+      if (!response.ok) {
+        console.error(
+          `⚠️ Failed to fetch categories from CMS. Status: ${response.status}`
+        );
+        return [];
+      }
+
+      const categoriesResponse = await response.json();
+      return categoriesResponse.items.map((category: ICategory) => ({
+        ...category,
+      }));
+    } catch (error) {
+      console.error("⚠️ Categories fetch failed:", error);
+      return [];
     }
-    const categoriesResponse = await response.json();
-    return categoriesResponse.items.map((category: ICategory) => ({
-      ...category,
-    }));
   },
   schema: categorySchema,
 });
 
 const pagesCollection = defineCollection({
   loader: async () => {
-    const response = await fetch(`${API_URL}/public/pages`, {
-      headers: {
-        "x-api-key": SECRET_KEY,
-      },
-    });
+    try {
+      const response = await fetch(`${API_URL}/public/pages`, {
+        headers: {
+          "x-api-key": SECRET_KEY,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch pages from CMS. Status: ${response.status}`
-      );
+      if (!response.ok) {
+        console.error(
+          `⚠️  Failed to fetch pages from CMS. Status: ${response.status}`
+        );
+        return [];
+      }
+      const pagesResponse = await response.json();
+      return pagesResponse.items.map((page: IPage) => ({
+        ...page,
+      }));
+    } catch (error) {
+      console.error("⚠️ Pages fetch failed:", error);
+      return [];
     }
-    const pagesResponse = await response.json();
-    return pagesResponse.items.map((page: IPage) => ({
-      ...page,
-    }));
   },
   schema: pageSchema,
 });
 
 const customCollectionsCollection = defineCollection({
   loader: async () => {
-    const response = await fetch(`${API_URL}/public/custom-collections`, {
-      headers: {
-        "x-api-key": SECRET_KEY,
-      },
-    });
+    try {
+      const response = await fetch(`${API_URL}/public/custom-collections`, {
+        headers: {
+          "x-api-key": SECRET_KEY,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch custom collections from CMS. Status: ${response.status}`
+      if (!response.ok) {
+        console.error(
+          `⚠️  Failed to fetch custom collections from CMS. Status: ${response.status}`
+        );
+        return [];
+      }
+      const customCollectionsResponse = await response.json();
+      return customCollectionsResponse.items.map(
+        (customCollection: ICustomCollection) => ({
+          ...customCollection,
+        })
       );
+    } catch (error) {
+      console.error("⚠️ Custom Collections fetch failed:", error);
+      return [];
     }
-    const customCollectionsResponse = await response.json();
-    return customCollectionsResponse.items.map(
-      (customCollection: ICustomCollection) => ({
-        ...customCollection,
-      })
-    );
   },
   schema: customCollectionSchema,
 });
 
 const microCopiesCollection = defineCollection({
   loader: async () => {
-    const response = await fetch(`${API_URL}/public/micro-copy`, {
-      headers: {
-        "x-api-key": SECRET_KEY,
-      },
-    });
+    try {
+      const response = await fetch(`${API_URL}/public/micro-copy`, {
+        headers: {
+          "x-api-key": SECRET_KEY,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch micro copies from CMS. Status: ${response.status}`
-      );
+      if (!response.ok) {
+        console.error(
+          `⚠️  Failed to fetch micro copies from CMS. Status: ${response.status}`
+        );
+        return [];
+      }
+      const microCopiesResponse = await response.json();
+      console.log("****Micro Copies Response:", microCopiesResponse);
+      return microCopiesResponse.map((microCopy: IMicrocopy) => ({
+        ...microCopy,
+      }));
+    } catch (error) {
+      console.error("⚠️ Micro Copies fetch failed:", error);
+      return [];
     }
-    const microCopiesResponse = await response.json();
-    return microCopiesResponse.map((microCopy: IMicrocopy) => ({
-      ...microCopy,
-    }));
   },
   schema: microcopySchema,
 });
