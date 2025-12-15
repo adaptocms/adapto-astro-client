@@ -1,8 +1,8 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
 import { articleSchema, type IArticle } from "./schemas/articles";
 import { categorySchema, type ICategory } from "./schemas/categories";
 import { pageSchema, type IPage } from "./schemas/pages";
-import { microcopySchema, type IMicrocopy } from "./schemas/microCopies";
+import { microCopySchema, type IMicroCopy } from "./schemas/microCopies";
 import {
   customCollectionSchema,
   type ICustomCollection,
@@ -10,6 +10,7 @@ import {
 
 const API_URL = import.meta.env.ADAPTO_API_URL;
 const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
+export const DEFAULT_LANGUAGE = "en-US";
 
 const articlesCollection = defineCollection({
   loader: async () => {
@@ -135,8 +136,8 @@ const microCopiesCollection = defineCollection({
         return [];
       }
       const microCopiesResponse = await response.json();
-      console.log("****Micro Copies Response:", microCopiesResponse);
-      return microCopiesResponse.map((microCopy: IMicrocopy) => ({
+
+      return microCopiesResponse.map((microCopy: IMicroCopy) => ({
         ...microCopy,
       }));
     } catch (error) {
@@ -144,7 +145,7 @@ const microCopiesCollection = defineCollection({
       return [];
     }
   },
-  schema: microcopySchema,
+  schema: microCopySchema,
 });
 
 export const collections = {

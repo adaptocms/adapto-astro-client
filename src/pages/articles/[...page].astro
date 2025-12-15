@@ -3,12 +3,93 @@ import { getCollection } from "astro:content";
 import type { GetStaticPathsOptions } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import Pagination from "../../components/Pagination.astro";
+import { DEFAULT_LANGUAGE } from "../../content.config";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const articles = await getCollection("articles");
-  const sortedArticles = articles.sort((a, b) => Number(a.id) - Number(b.id));
-  return paginate(sortedArticles, { pageSize: 3 });
+
+  const articlesByLanguage = articles.reduce(
+    (acc, article) => {
+      const lang = article.data.language;
+      if (!acc[lang]) {
+        acc[lang] = [];
+      }
+      acc[lang].push(article);
+      return acc;
+    },
+    {} as Record<string, typeof articles>
+  );
+
+  const sortedArticles = articlesByLanguage[DEFAULT_LANGUAGE].sort((a, b) =>
+    a.data.title.localeCompare(b.data.title)
+  );
+  const paginatedArticles = paginate(sortedArticles, { pageSize: 3 });
+  console.log("Paginated articles :", paginatedArticles);
+  return paginatedArticles;
 }
+
+// export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+//   const DEFAULT_LANGUAGE = "en-US"; // Must match a language code in your CMS data
+//   const ARTICLES_PER_PAGE = 2;
+//   const allPaths: any[] = [];
+//   const baseSlug = "articles";
+
+//   const allArticles = await getCollection("articles");
+
+//   const articlesByLanguage = allArticles.reduce(
+//     (acc, article) => {
+//       const lang = article.data.language;
+//       if (!acc[lang]) {
+//         acc[lang] = [];
+//       }
+//       acc[lang].push(article);
+//       return acc;
+//     },
+//     {} as Record<string, typeof allArticles>
+//   );
+
+//   // Iterate over every language found in the CMS data
+//   for (const [lang, articles] of Object.entries(articlesByLanguage)) {
+//     // 1. Sort articles (e.g., by title) - CRITICAL for consistent pagination
+//     articles.sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+//     // 2. Get the language-specific base slug
+
+//     // 3. Paginate the articles for the current language
+//     const pages = paginate(articles, {
+//       pageSize: ARTICLES_PER_PAGE,
+//     });
+
+//     // 4. Map pages to the final path structure
+//     pages.forEach((page) => {
+//       let path: string;
+
+//       if (lang === DEFAULT_LANGUAGE) {
+//         // Default language (e.g., /articles, /articles/page/2)
+//         path =
+//           page.params.page === "1"
+//             ? baseSlug
+//             : `${baseSlug}/page/${page.params.page}`;
+//       } else {
+//         path =
+//           page.params.page === "1"
+//             ? `${lang.substring(0, 2)}/${baseSlug}`
+//             : `${lang.substring(0, 2)}/${baseSlug}/page/${page.params.page}`;
+//       }
+
+//       allPaths.push({
+//         params: { page: path },
+//         props: {
+//           page,
+//           currentLang: lang,
+//           baseSlug: baseSlug,
+//         },
+//       });
+//     });
+//   }
+//   console.log("All generated paths for articles pagination:", allPaths);
+//   return allPaths;
+// }
 
 const { page } = Astro.props;
 
@@ -20,7 +101,7 @@ const pageTitle = `Articles Page ${page.currentPage}`;
 
   <ul style={{ listStyle: "none", padding: 0 }}>
     {
-      page.data.map((article) => (
+      page.data.map((article: any) => (
         <li
           style={{
             border: "1px solid #ccc",

@@ -55,4 +55,4 @@ export {
 };
 
 // Type inference
-// export type ICustomCollectionSchema = z.infer<typeof customCollectionSchema>;
+export type ICustomCollection = z.infer<typeof customCollectionSchema>;

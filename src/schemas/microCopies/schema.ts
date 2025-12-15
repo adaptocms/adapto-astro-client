@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const microcopySchema = z.object({
+const microCopySchema = z.object({
   id: z.string(),
   key: z.string(),
   value: z.string(),
@@ -11,7 +11,6 @@ const microcopySchema = z.object({
   updated_at: z.string(),
 });
 
-export { microcopySchema };
+export { microCopySchema };
 
-// Type inference
-export type IMicrocopy = z.infer<typeof microcopySchema>;
+export type IMicroCopy = z.infer<typeof microCopySchema>;

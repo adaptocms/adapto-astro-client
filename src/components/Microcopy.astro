@@ -1,9 +1,25 @@
 ---
 import { getCollection } from "astro:content";
+import { DEFAULT_LANGUAGE } from "../content.config";
+import type { IMicroCopy } from "../schemas/microCopies";
 
 const { key } = Astro.props;
-const microcopies = await getCollection("microCopies");
-const microcopy = microcopies.find((m) => m.data.key === key);
+const microCopies = await getCollection("microCopies");
+
+const microCopiesByLanguage = microCopies.reduce(
+  (acc, microCopy) => {
+    const lang = microCopy.data.language;
+    if (!acc[lang]) {
+      acc[lang] = [];
+    }
+    acc[lang].push(microCopy.data);
+    return acc;
+  },
+  {} as Record<string, IMicroCopy[]>
+);
+const microCopy = microCopiesByLanguage[DEFAULT_LANGUAGE]?.find(
+  (m) => m.key === key
+);
 ---
 
-{microcopy?.data.value || "Microcopy not found"}
+{microCopy?.value || "Microcopy not found"}
