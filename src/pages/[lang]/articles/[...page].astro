@@ -1,0 +1,80 @@
+---
+import { getCollection } from "astro:content";
+import type { GetStaticPathsOptions, Page } from "astro";
+import Pagination from "../../../components/Pagination.astro";
+import Layout from "../../../layouts/Layout.astro";
+import type { IArticle } from "../../../schemas/articles";
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const articles = await getCollection("articles");
+  const PAGE_SIZE = 2;
+
+  // Group by CMS language
+  const byLang = articles.reduce(
+    (acc, article) => {
+      const lang = article.data.language;
+      if (!acc[lang]) acc[lang] = [];
+      acc[lang].push(article);
+      return acc;
+    },
+    {} as Record<string, typeof articles>
+  );
+
+  const paths: any[] = [];
+
+  for (const cmsLang in byLang) {
+    const shortLang = cmsLang.slice(0, 2).toLowerCase();
+    console.log(`Processing language: ${cmsLang} (short: ${shortLang})`);
+
+    const sorted = byLang[cmsLang].sort((a, b) =>
+      a.data.title.localeCompare(b.data.title)
+    );
+    console.log(
+      `Sorted articles for ${cmsLang}:`,
+      sorted.map((a) => a.data.title)
+    );
+
+    const pages = paginate(sorted, {
+      pageSize: PAGE_SIZE,
+      params: { lang: shortLang },
+      props: { lang: cmsLang },
+    });
+
+    paths.push(...pages);
+  }
+
+  console.log("Generated pagination paths:", paths);
+  return paths;
+}
+
+const { page, lang } = Astro.props as { page: Page<IArticle>; lang: string };
+const pageTitle = `Articles (${lang}) Page ${page.currentPage}`;
+---
+
+<Layout pageTitle={pageTitle}>
+  <ul style={{ listStyle: "none", padding: 0 }}>
+    {
+      page.data.map((article: any) => (
+        <li
+          style={{
+            border: "1px solid #ccc",
+            padding: "15px",
+            marginBottom: "10px",
+            borderRadius: "5px",
+          }}
+        >
+          <h2>{article.data.title}</h2>
+          <p style={{ fontStyle: "italic", fontSize: "0.9em" }}>
+            {article.data.content.substring(0, 50)}...
+          </p>
+          <a
+            href={`/${article.data.language.slice(0, 2).toLowerCase()}/articles/${article.data.slug}`}
+          >
+            Read More
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <Pagination page={page} currentLang={lang} />
+</Layout>

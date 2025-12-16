@@ -10,11 +10,14 @@ import {
 
 const API_URL = import.meta.env.ADAPTO_API_URL;
 const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
+
 export const DEFAULT_LANGUAGE = "en-US";
+export const PAGE_SIZE = 3;
 
 const articlesCollection = defineCollection({
   loader: async () => {
     try {
+      console.log("Fetching articles from CMS...");
       const response = await fetch(`${API_URL}/public/articles`, {
         headers: {
           "x-api-key": SECRET_KEY,
