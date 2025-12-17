@@ -4,11 +4,25 @@ import type { GetStaticPathsOptions, Page } from "astro";
 import Pagination from "../../../components/Pagination.astro";
 import Layout from "../../../layouts/Layout.astro";
 import type { IArticle } from "../../../schemas/articles";
-import { DEFAULT_LANGUAGE } from "../../../content.config";
+import type { ILanguage } from "../../../schemas/languages/schema";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const articles = await getCollection("articles");
+  const languages = await getCollection("languages");
+  const defaultLanguage: ILanguage | null =
+    languages.find((lang) => lang.data.is_default)?.data || null;
+
   const PAGE_SIZE = 2;
+
+  const includeLangPrefix = languages.length > 1;
+
+  if (!includeLangPrefix) {
+    const sortedArticles = articles.sort((a, b) =>
+      a.data.title.localeCompare(b.data.title)
+    );
+    const paginatedArticles = paginate(sortedArticles, { pageSize: PAGE_SIZE });
+    return paginatedArticles;
+  }
 
   // Group by CMS language
   const byLang = articles.reduce(
@@ -25,6 +39,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
   for (const cmsLang in byLang) {
     const shortLang = cmsLang.slice(0, 2).toLowerCase();
+    console.log(`Processing language: ${cmsLang} (short: ${shortLang})`);
 
     const sorted = byLang[cmsLang].sort((a, b) =>
       a.data.title.localeCompare(b.data.title)
@@ -37,7 +52,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     });
 
     // Handle default language without prefix
-    if (cmsLang === DEFAULT_LANGUAGE) {
+    if (cmsLang === defaultLanguage?.code) {
       const defaultPages = paginate(sorted, {
         pageSize: PAGE_SIZE,
         params: { lang: undefined },
@@ -48,11 +63,14 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
     paths.push(...pages);
   }
-
+  console.log(`Generated pagination paths for multiple languages:`, paths);
   return paths;
 }
 
-const { page, lang } = Astro.props as { page: Page<IArticle>; lang: string };
+const { page, lang } = Astro.props as {
+  page: Page<IArticle>;
+  lang: string | undefined;
+};
 const { lang: shortLang } = Astro.params as { lang: string | undefined };
 const pageTitle = `Articles (${lang}) Page ${page.currentPage}`;
 ---

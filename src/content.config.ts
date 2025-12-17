@@ -7,9 +7,11 @@ import {
   customCollectionSchema,
   type ICustomCollection,
 } from "./schemas/customCollections";
+import { languageSchema } from "./schemas/languages/schema";
 
 const API_URL = import.meta.env.ADAPTO_API_URL;
 const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
+const TENANT_ID = SECRET_KEY?.split(".")[1] || "";
 
 export const DEFAULT_LANGUAGE = "en-US";
 export const PAGE_SIZE = 3;
@@ -151,10 +153,49 @@ const microCopiesCollection = defineCollection({
   schema: microCopySchema,
 });
 
+const languagesCollection = defineCollection({
+  loader: async () => {
+    try {
+      const res = await fetch(
+        `${API_URL}/public/available-languages?tenant_id=${TENANT_ID}`,
+        {
+          headers: { "x-api-key": SECRET_KEY },
+        }
+      );
+
+      if (!res.ok) {
+        console.warn("⚠️ Failed to load languages, falling back");
+        return [];
+      }
+
+      const codes: string[] = await res.json();
+
+      return codes.map((code, i) => {
+        const [lang, region] = code.split("-");
+        const label =
+          new Intl.DisplayNames([lang], { type: "language" }).of(lang) || lang;
+
+        return languageSchema.parse({
+          id: code,
+          code,
+          short: lang.toLowerCase(),
+          label,
+          is_default: i === 0, // First language is default
+        });
+      });
+    } catch (error) {
+      console.error("⚠️ Languages fetch failed:", error);
+      return [];
+    }
+  },
+  schema: languageSchema,
+});
+
 export const collections = {
   articles: articlesCollection,
   categories: categoriesCollection,
   pages: pagesCollection,
   microCopies: microCopiesCollection,
   customCollections: customCollectionsCollection,
+  languages: languagesCollection,
 };
