@@ -1,0 +1,47 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+import { DEFAULT_LANGUAGE } from "../../../content.config";
+
+export async function getStaticPaths() {
+  const articles = await getCollection("articles");
+
+  const paths = [];
+  for (const article of articles) {
+    const shortLang = article.data.language.split("-")[0];
+    // Handle default language without prefix
+    if (article.data.language === DEFAULT_LANGUAGE) {
+      paths.push({
+        params: {
+          slug: article.data.slug,
+          lang: undefined,
+        },
+        props: { article },
+      });
+    }
+    paths.push({
+      params: {
+        slug: article.data.slug,
+        lang: shortLang,
+      },
+      props: { article },
+    });
+  }
+
+  return paths;
+}
+
+const { article } = Astro.props;
+---
+
+<Layout pageTitle={article.data.title}>
+  <p>
+    <strong>Author: </strong>
+    {article.data.author}
+  </p>
+
+  <div
+    style={{ fontStyle: "italic", fontSize: "0.9em" }}
+    set:html={article.data.content}
+  />
+</Layout>

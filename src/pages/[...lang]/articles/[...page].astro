@@ -4,6 +4,7 @@ import type { GetStaticPathsOptions, Page } from "astro";
 import Pagination from "../../../components/Pagination.astro";
 import Layout from "../../../layouts/Layout.astro";
 import type { IArticle } from "../../../schemas/articles";
+import { DEFAULT_LANGUAGE } from "../../../content.config";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const articles = await getCollection("articles");
@@ -24,14 +25,9 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
   for (const cmsLang in byLang) {
     const shortLang = cmsLang.slice(0, 2).toLowerCase();
-    console.log(`Processing language: ${cmsLang} (short: ${shortLang})`);
 
     const sorted = byLang[cmsLang].sort((a, b) =>
       a.data.title.localeCompare(b.data.title)
-    );
-    console.log(
-      `Sorted articles for ${cmsLang}:`,
-      sorted.map((a) => a.data.title)
     );
 
     const pages = paginate(sorted, {
@@ -40,14 +36,24 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
       props: { lang: cmsLang },
     });
 
+    // Handle default language without prefix
+    if (cmsLang === DEFAULT_LANGUAGE) {
+      const defaultPages = paginate(sorted, {
+        pageSize: PAGE_SIZE,
+        params: { lang: undefined },
+        props: { lang: cmsLang },
+      });
+      paths.push(...defaultPages);
+    }
+
     paths.push(...pages);
   }
 
-  console.log("Generated pagination paths:", paths);
   return paths;
 }
 
 const { page, lang } = Astro.props as { page: Page<IArticle>; lang: string };
+const { lang: shortLang } = Astro.params as { lang: string | undefined };
 const pageTitle = `Articles (${lang}) Page ${page.currentPage}`;
 ---
 
@@ -68,7 +74,7 @@ const pageTitle = `Articles (${lang}) Page ${page.currentPage}`;
             {article.data.content.substring(0, 50)}...
           </p>
           <a
-            href={`/${article.data.language.slice(0, 2).toLowerCase()}/articles/${article.data.slug}`}
+            href={`/${shortLang ? shortLang + "/" : ""}articles/${article.data.slug}`}
           >
             Read More
           </a>
