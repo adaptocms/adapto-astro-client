@@ -1,9 +1,22 @@
 ---
+import { getCollection } from "astro:content";
 import Navigation from "./Navigation.astro";
+import LanguageSwitch from "./LanguageSwitch.astro";
+import { getDefaultLanguage } from "../languages/utils";
+
+const defaultLanguage = await getDefaultLanguage();
+const currentLanguage =
+  Astro.url.pathname.split("/")[1] || defaultLanguage?.short;
+const currentPath = Astro.url.pathname;
 ---
 
 <header>
   <nav>
     <Navigation />
+    <LanguageSwitch
+      currentLanguage={currentLanguage}
+      defaultLanguage={defaultLanguage}
+      currentPath={currentPath}
+    />
   </nav>
 </header>

@@ -1,6 +1,29 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Microcopy from "../components/Microcopy.astro";
+import Layout from "../../layouts/Layout.astro";
+import Microcopy from "../../components/Microcopy.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const languages = await getCollection("languages");
+  const includeLangPrefix = languages.length > 1;
+
+  const paths = [];
+
+  if (!includeLangPrefix) {
+    paths.push({ params: { lang: undefined } });
+  }
+
+  languages.forEach((language) => {
+    if (language.data.is_default) {
+      paths.push({ params: { lang: undefined } });
+    }
+    paths.push({ params: { lang: language.data.short } });
+  });
+
+  return paths;
+}
+
+const { lang } = Astro.params;
 ---
 
 <Layout pageTitle="Contact Us">
@@ -43,7 +66,7 @@ import Microcopy from "../components/Microcopy.astro";
           type="submit"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          <Microcopy key="contact_btn" />
+          <Microcopy key="contact_btn" lang={lang} />
         </button>
       </div>
     </form>

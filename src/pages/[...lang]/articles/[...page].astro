@@ -3,16 +3,14 @@ import { getCollection } from "astro:content";
 import type { GetStaticPathsOptions, Page } from "astro";
 import Pagination from "../../../components/Pagination.astro";
 import Layout from "../../../layouts/Layout.astro";
+import { getDefaultLanguage } from "../../../languages/utils";
+import { PAGE_SIZE } from "../../../content.config";
 import type { IArticle } from "../../../schemas/articles";
-import type { ILanguage } from "../../../schemas/languages/schema";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const articles = await getCollection("articles");
   const languages = await getCollection("languages");
-  const defaultLanguage: ILanguage | null =
-    languages.find((lang) => lang.data.is_default)?.data || null;
-
-  const PAGE_SIZE = 2;
+  const defaultLanguage = await getDefaultLanguage();
 
   const includeLangPrefix = languages.length > 1;
 

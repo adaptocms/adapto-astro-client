@@ -1,0 +1,66 @@
+---
+import { getCollection } from "astro:content";
+import type { ILanguage } from "../schemas/languages/schema";
+
+interface IProps {
+  currentLanguage: string; // Short code from URL, e.g., "en"
+  defaultLanguage: ILanguage;
+  currentPath: string; // e.g., "/articles/3" or "/articles/slug"
+  currentPage?: number;
+  totalPages?: number;
+  slug?: string;
+}
+
+const {
+  currentLanguage,
+  defaultLanguage,
+  currentPath,
+  currentPage = 1,
+  totalPages = 1,
+  slug,
+} = Astro.props as IProps;
+
+const languages = await getCollection("languages");
+
+// Build the target URL for a given language
+function buildUrl(targetShort: string) {
+  console.log("Languages available for switcher:", languages);
+  console.log(`targetShort: ${targetShort}`);
+  const isDefault = targetShort === defaultLanguage.short;
+  const segments = currentPath.split("/").filter(Boolean);
+
+  // Remove current lang prefix if present
+  if (languages.some((l) => l.data.short === segments[0])) segments.shift();
+
+  if (!isDefault) segments.unshift(targetShort); // Add prefix for non-default
+
+  const url = "/" + segments.join("/");
+  console.log(`Built URL for language ${targetShort}: ${url}`);
+  return url;
+}
+---
+
+{
+  languages.length >= 2 && (
+    <select id="language-switch">
+      {languages.map((lang) => (
+        <option
+          value={buildUrl(lang.data.short)}
+          selected={lang.data.short === currentLanguage}
+        >
+          {lang.data.label}
+        </option>
+      ))}
+    </select>
+  )
+}
+
+<script>
+  const select = document.getElementById("language-switch");
+  select?.addEventListener("change", (e) => {
+    const target = e.target;
+    if (target instanceof HTMLSelectElement) {
+      window.location.href = target.value;
+    }
+  });
+</script>

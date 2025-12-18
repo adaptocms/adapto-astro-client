@@ -13,8 +13,7 @@ const API_URL = import.meta.env.ADAPTO_API_URL;
 const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
 const TENANT_ID = SECRET_KEY?.split(".")[1] || "";
 
-export const DEFAULT_LANGUAGE = "en-US";
-export const PAGE_SIZE = 3;
+export const PAGE_SIZE = 2;
 
 const articlesCollection = defineCollection({
   loader: async () => {
