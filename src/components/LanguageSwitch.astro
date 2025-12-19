@@ -3,64 +3,82 @@ import { getCollection } from "astro:content";
 import type { ILanguage } from "../schemas/languages/schema";
 
 interface IProps {
-  currentLanguage: string; // Short code from URL, e.g., "en"
+  currentLanguage: string;
   defaultLanguage: ILanguage;
-  currentPath: string; // e.g., "/articles/3" or "/articles/slug"
-  currentPage?: number;
-  totalPages?: number;
-  slug?: string;
+  currentPath: string;
+  translationMap?: Record<string, string>;
+  contentType?: string;
 }
 
 const {
   currentLanguage,
   defaultLanguage,
   currentPath,
-  currentPage = 1,
-  totalPages = 1,
-  slug,
+  translationMap,
+  contentType,
 } = Astro.props as IProps;
 
 const languages = await getCollection("languages");
 
-// Build the target URL for a given language
 function buildUrl(targetShort: string) {
-  console.log("Languages available for switcher:", languages);
-  console.log(`targetShort: ${targetShort}`);
   const isDefault = targetShort === defaultLanguage.short;
+
+  // SCENARIO A: Entity Detail Page
+  if (translationMap && contentType && translationMap[targetShort]) {
+    const targetSlug = translationMap[targetShort];
+    return isDefault
+      ? `/${contentType}/${targetSlug}`
+      : `/${targetShort}/${contentType}/${targetSlug}`;
+  }
+
+  // SCENARIO B: Static Pages / Pagination
   const segments = currentPath.split("/").filter(Boolean);
+  if (languages.some((language) => language.data.short === segments[0])) {
+    segments.shift();
+  }
+  if (segments.length && /^\d+$/.test(segments.at(-1)!)) {
+    segments.pop();
+  }
 
-  // Remove current lang prefix if present
-  if (languages.some((l) => l.data.short === segments[0])) segments.shift();
-
-  if (!isDefault) segments.unshift(targetShort); // Add prefix for non-default
-
-  const url = "/" + segments.join("/");
-  console.log(`Built URL for language ${targetShort}: ${url}`);
-  return url;
+  if (!isDefault) segments.unshift(targetShort);
+  return "/" + segments.join("/");
 }
 ---
 
 {
   languages.length >= 2 && (
-    <select id="language-switch">
-      {languages.map((lang) => (
-        <option
-          value={buildUrl(lang.data.short)}
-          selected={lang.data.short === currentLanguage}
-        >
-          {lang.data.label}
-        </option>
-      ))}
+    <select id="language-switch" class="border rounded px-2 py-1 bg-white">
+      {languages.map((lang) => {
+        const short = lang.data.short;
+        const url = buildUrl(short);
+
+        // LOGIC: If we are on an article detail page (contentType exists),
+        // disable the option if the target language is NOT in our translation map.
+        // We never disable the currently active language.
+        const isUnavailable =
+          contentType && translationMap && !translationMap[short];
+        const isDisabled = isUnavailable && short !== currentLanguage;
+
+        return (
+          <option
+            value={url}
+            selected={short === currentLanguage}
+            disabled={isDisabled}
+          >
+            {lang.data.label} {isDisabled ? "(N/A)" : ""}
+          </option>
+        );
+      })}
     </select>
   )
 }
 
 <script>
-  const select = document.getElementById("language-switch");
-  select?.addEventListener("change", (e) => {
-    const target = e.target;
-    if (target instanceof HTMLSelectElement) {
-      window.location.href = target.value;
-    }
-  });
+  document
+    .getElementById("language-switch")
+    ?.addEventListener("change", (e) => {
+      if (e.target instanceof HTMLSelectElement) {
+        window.location.href = e.target.value;
+      }
+    });
 </script>

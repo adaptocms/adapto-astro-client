@@ -1,6 +1,32 @@
+---
+interface IProps {
+  currentLanguage: string;
+  defaultLanguageShort: string;
+}
+
+const { currentLanguage, defaultLanguageShort } = Astro.props as IProps;
+
+const langPrefix =
+  currentLanguage === defaultLanguageShort ? "" : `/${currentLanguage}`;
+
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/articles", label: "Articles" },
+  { href: "/categories", label: "Categories" },
+  { href: "/custom-collections", label: "Custom Collections" },
+];
+---
+
 <div>
-  <a href="/">Home</a>
-  <a href="/articles/">Articles</a>
-  <a href="/categories/">Categories</a>
-  <a href="/custom-collections/">Custom Collections</a>
+  {
+    navItems.map((item) => {
+      const localizedHref = `${langPrefix}${item.href}`;
+
+      return (
+        <a href={localizedHref} style="margin-right: 1rem;">
+          {item.label}
+        </a>
+      );
+    })
+  }
 </div>

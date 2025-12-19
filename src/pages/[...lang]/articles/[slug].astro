@@ -3,54 +3,62 @@ import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
 import { getDefaultLanguage } from "../../../languages/utils";
 
+type IArticleParams = {
+  slug: string;
+  lang: string | undefined;
+};
+
 export async function getStaticPaths() {
   const articles = await getCollection("articles");
-  const languages = await getCollection("languages");
-
   const defaultLanguage = await getDefaultLanguage();
 
-  const includeLangPrefix = languages.length > 1;
-
-  // If only one language, no need for lang prefix
-  if (!includeLangPrefix) {
-    const paths = articles.map((article) => ({
-      params: { slug: article.data.slug },
-      props: { article },
-    }));
-    return paths;
-  }
-
-  // Multiple languages, include lang prefix
-  const paths = [];
-
-  for (const article of articles) {
+  return articles.flatMap((article) => {
     const shortLang = article.data.language.split("-")[0];
-    // Handle default language without prefix
-    if (article.data.language === defaultLanguage?.code) {
+    const isDefault = article.data.language === defaultLanguage?.code;
+
+    // Use translation_of_id to find siblings
+    const rootId = article.data.translation_of_id || article.id;
+    const siblings = articles.filter(
+      (a) => a.id === rootId || a.data.translation_of_id === rootId
+    );
+
+    const translationMap: Record<string, string> = {};
+    siblings.forEach((s) => {
+      const sShort = s.data.language.split("-")[0];
+      translationMap[sShort] = s.data.slug;
+    });
+
+    const baseParams = { slug: article.data.slug };
+
+    // Path 1: /en/articles/slug
+    const paths = [
+      {
+        params: { ...baseParams, lang: shortLang } as IArticleParams,
+        props: { article, translationMap },
+      },
+    ];
+
+    // Path 2: /articles/slug (Default Language only)
+    if (isDefault) {
       paths.push({
-        params: {
-          slug: article.data.slug,
-          lang: undefined,
-        },
-        props: { article },
+        params: { ...baseParams, lang: undefined },
+        props: { article, translationMap },
       });
     }
-    paths.push({
-      params: {
-        slug: article.data.slug,
-        lang: shortLang,
-      },
-      props: { article },
-    });
-  }
-
-  return paths;
+    return paths;
+  });
 }
 
-const { article } = Astro.props;
+const defaultLanguage = await getDefaultLanguage();
+const { article, translationMap } = Astro.props;
+const { lang } = Astro.params;
 ---
 
-<Layout pageTitle={article.data.title}>
+<Layout
+  pageTitle={article.data.title}
+  translationMap={translationMap}
+  contentType="articles"
+>
   <p>
     <strong>Author: </strong>
     {article.data.author}
