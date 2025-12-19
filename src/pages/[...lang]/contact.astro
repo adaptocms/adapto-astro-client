@@ -24,9 +24,10 @@ export async function getStaticPaths() {
 }
 
 const { lang } = Astro.params;
+const pageTitle = "Contact Us";
 ---
 
-<Layout pageTitle="Contact Us">
+<Layout pageTitle={pageTitle}>
   <main class="container mx-auto px-4 py-8">
     <form class="max-w-lg mx-auto">
       <div class="mb-4">

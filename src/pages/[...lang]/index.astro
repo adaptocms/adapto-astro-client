@@ -1,0 +1,71 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+import type { IPage } from "../../schemas/pages";
+import { getDefaultLanguage } from "../../languages/utils";
+import Microcopy from "../../components/Microcopy.astro";
+
+export async function getStaticPaths() {
+  const languages = await getCollection("languages");
+  const includeLangPrefix = languages.length > 1;
+
+  const paths = [];
+
+  if (!includeLangPrefix) {
+    paths.push({ params: { lang: undefined } });
+  }
+
+  languages.forEach((language) => {
+    if (language.data.is_default) {
+      paths.push({ params: { lang: undefined } });
+    }
+    paths.push({ params: { lang: language.data.short } });
+  });
+
+  return paths;
+}
+
+const pages = await getCollection("pages");
+const defaultLanguage = await getDefaultLanguage();
+const homePageCMS: IPage | undefined = pages.find(
+  (page) => page.data.slug === "home"
+)?.data;
+
+const homePageWithTranslations: Record<string, IPage> = {};
+const translationMap: Record<string, string> = {}; // Add this
+
+if (homePageCMS) {
+  const rootShortCode = homePageCMS.language.split("-")[0].toLowerCase();
+  homePageWithTranslations[rootShortCode] = homePageCMS;
+  translationMap[rootShortCode] = homePageCMS.slug; // Store slug
+
+  pages
+    .filter((page) => page.data.translation_of_id === homePageCMS.id)
+    .map((page) => page.data)
+    .forEach((translatedPage) => {
+      const shortCode = translatedPage.language.split("-")[0].toLowerCase();
+      homePageWithTranslations[shortCode] = translatedPage;
+      translationMap[shortCode] = translatedPage.slug; // Store translated slug
+    });
+}
+const { lang } = Astro.params;
+const activeLangKey = lang || defaultLanguage?.short || "en";
+const currentPage = homePageWithTranslations[activeLangKey];
+
+const pageTitle = currentPage ? currentPage.title : "Home Page";
+
+---
+
+<Layout pageTitle={pageTitle} translationMap={translationMap}>
+  {
+    currentPage && (
+      <main>
+        <h3>
+          <Microcopy key="adapto" lang={activeLangKey} />
+        </h3>
+
+        <div set:html={currentPage.content} />
+      </main>
+    )
+  }
+</Layout>

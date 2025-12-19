@@ -1,30 +1,21 @@
 ---
-import { getCollection } from "astro:content";
 import Navigation from "./Navigation.astro";
 import LanguageSwitch from "./LanguageSwitch.astro";
-import { getDefaultLanguage } from "../languages/utils";
+import { getDefaultLanguage, hasLanguagePrefixInUrl } from "../languages/utils";
 
 const { translationMap, contentType } = Astro.props;
 
 const defaultLanguage = await getDefaultLanguage();
-const currentLanguage =
-  Astro.url.pathname.split("/")[1] || defaultLanguage?.short;
+const hasLangPrefix = await hasLanguagePrefixInUrl(Astro.url.pathname);
 
-// Logic to check if the first segment is actually a language code
-const languages = await getCollection("languages");
-const hasLangPrefix = languages.some((l) => l.data.short === currentLanguage);
-
-const activeLang = hasLangPrefix ? currentLanguage : defaultLanguage?.short;
+const activeLang = hasLangPrefix
+  ? Astro.url.pathname.split("/")[1]
+  : defaultLanguage?.short;
 ---
 
 <header>
-  <nav
-    style="display: flex; align-items: center; justify-content: space-between;"
-  >
-    <Navigation
-      currentLanguage={currentLanguage}
-      defaultLanguageShort={defaultLanguage?.short}
-    />
+  <nav>
+    <Navigation langPrefix={hasLangPrefix ? activeLang : undefined} />
     <LanguageSwitch
       currentLanguage={activeLang}
       defaultLanguage={defaultLanguage}

@@ -52,6 +52,9 @@ export async function getStaticPaths() {
 const defaultLanguage = await getDefaultLanguage();
 const { article, translationMap } = Astro.props;
 const { lang } = Astro.params;
+console.log("translationMap", translationMap);
+
+const currentLanguage = lang || defaultLanguage?.short;
 ---
 
 <Layout
