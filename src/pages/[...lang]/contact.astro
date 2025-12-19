@@ -1,34 +1,43 @@
 ---
+import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Microcopy from "../../components/Microcopy.astro";
-import { getCollection } from "astro:content";
+import {
+  getDefaultLanguage,
+  getLanguageStaticPaths,
+  buildTranslationMap,
+} from "../../languages/utils";
+
+const defaultLanguage = await getDefaultLanguage();
+const pages = await getCollection("pages");
 
 export async function getStaticPaths() {
-  const languages = await getCollection("languages");
-  const includeLangPrefix = languages.length > 1;
-
-  const paths = [];
-
-  if (!includeLangPrefix) {
-    paths.push({ params: { lang: undefined } });
-  }
-
-  languages.forEach((language) => {
-    if (language.data.is_default) {
-      paths.push({ params: { lang: undefined } });
-    }
-    paths.push({ params: { lang: language.data.short } });
-  });
-
-  return paths;
+  return await getLanguageStaticPaths();
 }
 
+const translations = buildTranslationMap(
+  "contact",
+  pages,
+  defaultLanguage?.code || ""
+);
+
 const { lang } = Astro.params;
-const pageTitle = "Contact Us";
+
+const activeLangKey = lang || defaultLanguage?.short || "en";
+const currentPage = translations[activeLangKey];
+const pageTitle = currentPage ? currentPage.title : "Contact Us";
 ---
 
 <Layout pageTitle={pageTitle}>
+  {
+    currentPage && (
+      <main>
+        <div set:html={currentPage.content} />
+      </main>
+    )
+  }
   <main class="container mx-auto px-4 py-8">
+    <p>this form is hardcoded</p>
     <form class="max-w-lg mx-auto">
       <div class="mb-4">
         <label for="name" class="block text-gray-700 font-bold mb-2">Name</label
@@ -63,6 +72,7 @@ const pageTitle = "Contact Us";
         ></textarea>
       </div>
       <div class="flex items-center justify-center">
+        <p>this button has microcopy</p>
         <button
           type="submit"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
