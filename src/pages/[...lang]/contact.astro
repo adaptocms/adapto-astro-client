@@ -2,33 +2,38 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Microcopy from "../../components/Microcopy.astro";
-import {
-  getDefaultLanguage,
-  getLanguageStaticPaths,
-  buildTranslationMap,
-} from "../../languages/utils";
+import { getDefaultLanguage, getPageStaticPaths } from "../../languages/utils";
+import type { ILanguageLink } from "../../schemas/languages";
+import type { IPage } from "../../schemas/pages";
 
 const defaultLanguage = await getDefaultLanguage();
-const pages = await getCollection("pages");
 
 export async function getStaticPaths() {
-  return await getLanguageStaticPaths();
+  return await getPageStaticPaths("contact");
 }
 
-const translations = buildTranslationMap(
-  "contact",
-  pages,
-  defaultLanguage?.code || ""
-);
+const { lang, translations } = Astro.props as {
+  lang: string;
+  translations: Record<string, IPage>;
+};
 
-const { lang } = Astro.params;
+const translationLinks: ILanguageLink[] = Object.keys(translations).map(
+  (lang) => ({
+    lang,
+    href: `/${lang}/contact`,
+  })
+);
 
 const activeLangKey = lang || defaultLanguage?.short || "en";
 const currentPage = translations[activeLangKey];
 const pageTitle = currentPage ? currentPage.title : "Contact Us";
 ---
 
-<Layout pageTitle={pageTitle}>
+<Layout
+  pageTitle={pageTitle}
+  links={translationLinks}
+  currentLang={activeLangKey}
+>
   {
     currentPage && (
       <main>

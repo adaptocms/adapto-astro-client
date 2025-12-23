@@ -2,73 +2,89 @@
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
 import { getDefaultLanguage } from "../../../languages/utils";
+import { DEFAULT_LANGUAGE } from "../../../content.config";
+import type { IArticle } from "../../../schemas/articles";
+import type { ILanguageLink } from "../../../schemas/languages";
 
-type IArticleParams = {
-  slug: string;
-  lang: string | undefined;
-};
+export interface ArticlePath {
+  params: { slug: string; lang?: string };
+  props: { article: IArticle; translationLinks: ILanguageLink[] };
+}
 
-export async function getStaticPaths() {
+export async function getStaticPaths(): Promise<ArticlePath[]> {
   const articles = await getCollection("articles");
-  const defaultLanguage = await getDefaultLanguage();
+  const languages = await getCollection("languages");
+  const defaultLang = languages.find((l) => l.data.is_default)?.data.short;
 
-  return articles.flatMap((article) => {
-    const shortLang = article.data.language.split("-")[0];
-    const isDefault = article.data.language === defaultLanguage?.code;
+  const paths: ArticlePath[] = [];
+  const groups: Record<string, IArticle[]> = {};
 
-    // Use translation_of_id to find siblings
-    const rootId = article.data.translation_of_id || article.id;
-    const siblings = articles.filter(
-      (a) => a.id === rootId || a.data.translation_of_id === rootId
-    );
+  articles.forEach((article) => {
+    const groupId = article.data.translation_of_id ?? article.id;
+    if (!groups[groupId]) groups[groupId] = [];
+    groups[groupId].push(article.data);
+  });
 
-    const translationMap: Record<string, string> = {};
-    siblings.forEach((s) => {
-      const sShort = s.data.language.split("-")[0];
-      translationMap[sShort] = s.data.slug;
+  for (const groupId in groups) {
+    const groupArticles = groups[groupId];
+
+    // Always produce a translationLinks array
+    const translationLinks: ILanguageLink[] = [];
+    languages.forEach((language) => {
+      const lang = language.data.short;
+      const sibling = groupArticles.find(
+        (a) => a.language.split("-")[0] === lang
+      );
+      if (sibling) {
+        translationLinks.push({
+          lang,
+          href: `/${lang}/articles/${sibling.slug}`,
+        });
+      }
     });
 
-    const baseParams = { slug: article.data.slug };
+    groupArticles.forEach((article) => {
+      const lang = article.language.split("-")[0];
+      const isDefault = lang === defaultLang;
 
-    // Path 1: /en/articles/slug
-    const paths = [
-      {
-        params: { ...baseParams, lang: shortLang } as IArticleParams,
-        props: { article, translationMap },
-      },
-    ];
-
-    // Path 2: /articles/slug (Default Language only)
-    if (isDefault) {
+      // Path with language prefix
       paths.push({
-        params: { ...baseParams, lang: undefined },
-        props: { article, translationMap },
+        params: { slug: article.slug, lang },
+        props: { article, translationLinks },
       });
-    }
-    return paths;
-  });
+
+      // Path without prefix for default language
+      if (isDefault) {
+        paths.push({
+          params: { slug: article.slug, lang: undefined },
+          props: { article, translationLinks },
+        });
+      }
+    });
+  }
+
+  return paths;
 }
 
 const defaultLanguage = await getDefaultLanguage();
-const { article, translationMap } = Astro.props;
-const { lang } = Astro.params;
-console.log("translationMap", translationMap);
 
-const currentLanguage = lang || defaultLanguage?.short;
+const { article, translationLinks } = Astro.props;
+const { lang } = Astro.params;
+const currentLanguage = lang || defaultLanguage?.short || DEFAULT_LANGUAGE;
 ---
 
 <Layout
-  pageTitle={article.data.title}
-  translationMap={translationMap}
-  contentType="articles"
+  pageTitle={article.title}
+  links={translationLinks}
+  currentLang={currentLanguage}
 >
   <p>
     <strong>Author: </strong>
-    {article.data.author}
+    {article.author}
   </p>
 
   <div
     style={{ fontStyle: "italic", fontSize: "0.9em" }}
-    set:html={article.data.content}
+    set:html={article.content}
   />
 </Layout>

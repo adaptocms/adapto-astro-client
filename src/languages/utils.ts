@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import type { ILanguage, ILanguagePathParams } from "../schemas/languages";
+import type { IPage } from "../schemas/pages";
 
 const getDefaultLanguage = async (): Promise<ILanguage | null> => {
   const languages = await getCollection("languages");
@@ -21,70 +22,66 @@ const hasLanguagePrefixInUrl = async (pathname: string): Promise<boolean> => {
   return availableLanguages.includes(pathname.split("/")[1]);
 };
 
-/**
- * Generates paths for [lang] or [...lang] dynamic routes.
- * Supports root paths for default language and prefixed paths for all.
- */
-const getLanguageStaticPaths = async (): Promise<ILanguagePathParams[]> => {
-  const languages = await getCollection("languages");
-  const paths: ILanguagePathParams[] = [];
+const getPagesWithTranslations = async (
+  page: string
+): Promise<Record<string, IPage>> => {
+  const pages: IPage[] = (await getCollection("pages")).map((p) => p.data);
+  const pageTranslations: Record<string, IPage> = {};
+  const pageInDefaultLang = pages.find((p) => p.slug === page);
+  if (pageInDefaultLang) {
+    const langCode = pageInDefaultLang.language.split("-")[0].toLowerCase();
+    pageTranslations[langCode] = pageInDefaultLang;
 
-  // If only one language exists, we only want the root path
-  if (languages.length <= 1) {
-    return [{ params: { lang: undefined } }];
+    pages.forEach((page) => {
+      if (page.translation_of_id === pageInDefaultLang.id) {
+        const shortLang = page.language.split("-")[0].toLowerCase();
+        pageTranslations[shortLang] = page;
+      }
+    });
   }
-
-  languages.forEach((language) => {
-    // Generate root path for default (e.g., /contact)
-    if (language.data.is_default) {
-      paths.push({ params: { lang: undefined } });
-    }
-    // Generate prefixed path (e.g., /ro/contact)
-    paths.push({ params: { lang: language.data.short } });
-  });
-
-  return paths;
+  return pageTranslations;
 };
 
 /**
- * Finds a root entry and all its translations, returning a map keyed by short code.
- * @param slug - The slug of the anchor page in the default language (e.g., 'home' or 'contact')
- * @param pages - The collection of all pages
- * @param defaultLangCode - The full code of the default language (e.g., 'en-US')
+ * Generates paths for [lang] or [...lang] dynamic routes.
+ * Supports root paths for default language and prefixed paths for all.
+ * Adds translation data to props for easier access in pages.
  */
-const buildTranslationMap = (
-  slug: string,
-  pages: any[],
-  defaultLangCode: string
-) => {
-  const translations: Record<string, any> = {};
+const getPageStaticPaths = async (
+  pageSlug: string
+): Promise<ILanguagePathParams[]> => {
+  const pageTranslations = await getPagesWithTranslations(pageSlug);
 
-  // 1. Find the anchor page (the one in default language)
-  const anchorPage = pages.find(
-    (p) => p.data.slug === slug && p.data.language === defaultLangCode
-  );
+  const paths: ILanguagePathParams[] = [];
 
-  if (anchorPage) {
-    // 2. Find all translations linked to this anchor ID
-    const related = pages.filter(
-      (p) =>
-        p.data.id === anchorPage.id ||
-        p.data.translation_of_id === anchorPage.id
-    );
-
-    related.forEach((p) => {
-      const shortLang = p.data.language.split("-")[0].toLowerCase();
-      translations[shortLang] = p.data;
+  if (Object.entries(pageTranslations).length >= 1) {
+    Object.entries(pageTranslations).forEach(([shortLang, page]) => {
+      if (page.translation_of_id === null) {
+        paths.push({
+          params: { lang: undefined },
+          props: { lang: shortLang, translations: pageTranslations },
+        });
+      }
+      paths.push({
+        params: {
+          lang: shortLang,
+        },
+        props: { lang: shortLang, translations: pageTranslations },
+      });
     });
   }
 
-  return translations;
+  console.log(
+    `@@@@@@Generated ${paths.length} static paths for page "${pageSlug}"`,
+    paths
+  );
+  return paths;
 };
 
 export {
   getDefaultLanguage,
   getFullLanguageCode,
   hasLanguagePrefixInUrl,
-  getLanguageStaticPaths,
-  buildTranslationMap,
+  getPageStaticPaths,
+  getPagesWithTranslations,
 };

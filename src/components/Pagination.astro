@@ -1,13 +1,36 @@
 ---
 import type { Page } from "astro";
 
-const { page } = Astro.props as { page: Page<any> };
+const { page, currentLang, basePath } = Astro.props as {
+  page: Page<any>;
+  currentLang: string;
+  basePath: string;
+};
 
 const totalPages = page.lastPage;
 const currentPage = page.currentPage;
 
 const isFirstPage = currentPage === 1;
 const isLastPage = currentPage === totalPages;
+
+/**
+ * Constructs the URL based on the language and current page.
+ * Handles: /articles, /articles/2, /ro/articles, /ro/articles/2
+ */
+function getPageUrl(targetPage: number): string {
+  // 1. Build the localized base: "" or "/ro"
+  const langPart = currentLang ? `/${currentLang}` : "";
+
+  // 2. Add the content base: "/articles"
+  const fullBase = `${langPart}/${basePath}`;
+
+  // 3. Handle Page 1 vs Other pages
+  if (targetPage === 1) {
+    return `${fullBase}/`;
+  }
+
+  return `${fullBase}/${targetPage}`;
+}
 
 /**
  * Determines the exact array of 1-3 page numbers to display based on the rules.
@@ -30,31 +53,6 @@ function getNumberedPageLabels(
 
   // Centered
   return [currentPage - 1, currentPage, currentPage + 1];
-}
-
-/**
- * Constructs a robust URL for any target page number.
- */
-function getPageUrl(targetPage: number): string {
-  // Use the current URL as the most stable template for the base path.
-  // Strip any query parameters or hash fragments.
-  const currentUrl = page.url.current.split("?")[0].split("#")[0];
-
-  if (targetPage === 1) {
-    // Page 1: Strip any trailing page number to get the clean root path (e.g., /articles/)
-    return currentUrl.replace(/\/\d+\/$/, "/").replace(/\/\d+$/, "/");
-  }
-
-  // Find the clean base path (e.g., /articles/) by stripping any existing page number.
-  let baseUrl = currentUrl.replace(/\/\d+\/$/, "/").replace(/\/\d+$/, "/");
-
-  // Ensure the base path always ends with a single slash.
-  if (!baseUrl.endsWith("/")) {
-    baseUrl += "/";
-  }
-
-  // Append the target page number and a trailing slash.
-  return `${baseUrl}${targetPage}/`;
 }
 
 const numberedLabels = getNumberedPageLabels(totalPages, currentPage);

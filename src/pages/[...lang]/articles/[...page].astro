@@ -6,6 +6,7 @@ import Layout from "../../../layouts/Layout.astro";
 import { getDefaultLanguage } from "../../../languages/utils";
 import { PAGE_SIZE } from "../../../content.config";
 import type { IArticle } from "../../../schemas/articles";
+import type { ILanguageLink } from "../../../schemas/languages";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const articles = await getCollection("articles");
@@ -33,11 +34,18 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     {} as Record<string, typeof articles>
   );
 
+  const translationLinks: ILanguageLink[] = Object.keys(byLang).map((lang) => {
+    const shortLang = lang.slice(0, 2).toLowerCase();
+    return {
+      lang: shortLang,
+      href: `/${shortLang}/articles`,
+    };
+  });
+
   const paths: any[] = [];
 
   for (const cmsLang in byLang) {
     const shortLang = cmsLang.slice(0, 2).toLowerCase();
-    console.log(`Processing language: ${cmsLang} (short: ${shortLang})`);
 
     const sorted = byLang[cmsLang].sort((a, b) =>
       a.data.title.localeCompare(b.data.title)
@@ -46,7 +54,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     const pages = paginate(sorted, {
       pageSize: PAGE_SIZE,
       params: { lang: shortLang },
-      props: { lang: cmsLang },
+      props: { lang: shortLang, translationLinks },
     });
 
     // Handle default language without prefix
@@ -54,26 +62,27 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
       const defaultPages = paginate(sorted, {
         pageSize: PAGE_SIZE,
         params: { lang: undefined },
-        props: { lang: cmsLang },
+        props: { lang: shortLang, translationLinks },
       });
       paths.push(...defaultPages);
     }
 
     paths.push(...pages);
   }
-  // console.log(`Generated pagination paths for multiple languages:`, paths);
+
   return paths;
 }
 
-const { page, lang } = Astro.props as {
+const { page, lang, translationLinks } = Astro.props as {
   page: Page<IArticle>;
-  lang: string | undefined;
+  lang: string;
+  translationLinks: ILanguageLink[];
 };
-const { lang: shortLang } = Astro.params as { lang: string | undefined };
+
 const pageTitle = `Articles (${lang}) Page ${page.currentPage}`;
 ---
 
-<Layout pageTitle={pageTitle}>
+<Layout pageTitle={pageTitle} links={translationLinks} currentLang={lang}>
   <ul style={{ listStyle: "none", padding: 0 }}>
     {
       page.data.map((article: any) => (
@@ -89,14 +98,10 @@ const pageTitle = `Articles (${lang}) Page ${page.currentPage}`;
           <p style={{ fontStyle: "italic", fontSize: "0.9em" }}>
             {article.data.content.substring(0, 50)}...
           </p>
-          <a
-            href={`/${shortLang ? shortLang + "/" : ""}articles/${article.data.slug}`}
-          >
-            Read More
-          </a>
+          <a href={`/${lang}/articles/${article.data.slug}`}>Read More</a>
         </li>
       ))
     }
   </ul>
-  <Pagination page={page} currentLang={lang} />
+  <Pagination page={page} currentLang={lang} basePath="articles" />
 </Layout>

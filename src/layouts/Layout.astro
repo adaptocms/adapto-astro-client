@@ -1,18 +1,20 @@
 ---
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
+import { DEFAULT_LANGUAGE } from "../content.config";
+import type { ILanguageLink } from "../schemas/languages";
 
 type IProps = {
   pageTitle: string;
-  translationMap?: Record<string, string>;
-  contentType: string;
+  currentLang: string;
+  links?: ILanguageLink[];
 };
 
-const { pageTitle, translationMap, contentType } = Astro.props as IProps;
+const { pageTitle, currentLang, links } = Astro.props as IProps;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={DEFAULT_LANGUAGE}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -21,7 +23,7 @@ const { pageTitle, translationMap, contentType } = Astro.props as IProps;
     <title>{pageTitle}</title>
   </head>
   <body>
-    <Header translationMap={translationMap} contentType={contentType} />
+    <Header currentLang={currentLang} links={links} />
     <h1>{pageTitle}</h1>
     <slot />
     <Footer />

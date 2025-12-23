@@ -1,27 +1,25 @@
 ---
 import Navigation from "./Navigation.astro";
 import LanguageSwitch from "./LanguageSwitch.astro";
-import { getDefaultLanguage, hasLanguagePrefixInUrl } from "../languages/utils";
+import { getDefaultLanguage } from "../languages/utils";
+import { DEFAULT_LANGUAGE } from "../content.config";
 
-const { translationMap, contentType } = Astro.props;
+const { currentLang, links } = Astro.props;
 
 const defaultLanguage = await getDefaultLanguage();
-const hasLangPrefix = await hasLanguagePrefixInUrl(Astro.url.pathname);
-
+const pathSegments = Astro.url.pathname.split("/").filter(Boolean);
+const hasLangPrefix = pathSegments.length > 0 && pathSegments[0].length === 2; // crude but works
 const activeLang = hasLangPrefix
-  ? Astro.url.pathname.split("/")[1]
-  : defaultLanguage?.short;
+  ? pathSegments[0]
+  : defaultLanguage?.short || DEFAULT_LANGUAGE;
 ---
 
-<header>
-  <nav>
+<header style="width: 100%; border-bottom: 1px solid #eee;">
+  <nav
+    style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 1rem 2rem; box-sizing: border-box;"
+  >
     <Navigation langPrefix={hasLangPrefix ? activeLang : undefined} />
-    <LanguageSwitch
-      currentLanguage={activeLang}
-      defaultLanguage={defaultLanguage}
-      currentPath={Astro.url.pathname}
-      translationMap={translationMap}
-      contentType={contentType}
-    />
+
+    <LanguageSwitch currentLang={currentLang} links={links} />
   </nav>
 </header>

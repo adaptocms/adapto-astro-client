@@ -13,17 +13,18 @@ const navItems = [
 ];
 ---
 
-<nav>
+<div style="display: flex; gap: 1rem;">
   {
     navItems.map((item) => {
       return (
         <a
           href={langPrefix ? `/${langPrefix}${item.href}` : item.href}
-          style="margin-right: 1rem;"
+          style="margin-right: 1.5rem;"
+          class="hover:underline"
         >
           {item.label}
         </a>
       );
     })
   }
-</nav>
+</div>

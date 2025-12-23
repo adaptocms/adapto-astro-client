@@ -14,11 +14,12 @@ const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
 const TENANT_ID = SECRET_KEY?.split(".")[1] || "";
 
 export const PAGE_SIZE = 2;
+export const DEFAULT_LANGUAGE = "en";
+const LIMIT =20
 
 const articlesCollection = defineCollection({
   loader: async () => {
     try {
-      console.log("Fetching articles from CMS...");
       const response = await fetch(`${API_URL}/public/articles`, {
         headers: {
           "x-api-key": SECRET_KEY,
@@ -71,7 +72,7 @@ const categoriesCollection = defineCollection({
 const pagesCollection = defineCollection({
   loader: async () => {
     try {
-      const response = await fetch(`${API_URL}/public/pages`, {
+      const response = await fetch(`${API_URL}/public/pages?limit=${LIMIT}`, {
         headers: {
           "x-api-key": SECRET_KEY,
         },
