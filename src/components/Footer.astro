@@ -1,5 +1,5 @@
 ---
-import { hasLanguagePrefixInUrl } from "../languages/utils";
+import { hasLanguagePrefixInUrl } from "../utils/languages.ts";
 
 const hasLangPrefix = await hasLanguagePrefixInUrl(Astro.url.pathname);
 

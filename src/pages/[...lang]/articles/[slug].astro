@@ -1,7 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { getDefaultLanguage } from "../../../languages/utils";
+import { getDefaultLanguage } from "../../../utils/languages.ts";
+import { hydrateMediaPlacements } from "../../../utils/hydrateMediaPlacements";
 import { DEFAULT_LANGUAGE } from "../../../content.config";
 import type { IArticle } from "../../../schemas/articles";
 import type { ILanguageLink } from "../../../schemas/languages";
@@ -71,6 +72,11 @@ const defaultLanguage = await getDefaultLanguage();
 const { article, translationLinks } = Astro.props;
 const { lang } = Astro.params;
 const currentLanguage = lang || defaultLanguage?.short || DEFAULT_LANGUAGE;
+
+const renderedContent = hydrateMediaPlacements(
+  article.content,
+  article.media_objects_placements
+);
 ---
 
 <Layout
@@ -85,6 +91,6 @@ const currentLanguage = lang || defaultLanguage?.short || DEFAULT_LANGUAGE;
 
   <div
     style={{ fontStyle: "italic", fontSize: "0.9em" }}
-    set:html={article.content}
+    set:html={renderedContent}
   />
 </Layout>

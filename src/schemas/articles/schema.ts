@@ -25,7 +25,24 @@ const sourceSchema = z.object({
   license: z.string().nullable(),
 });
 
-const mediaObjectsPlacementSchema = z.record(z.record(z.unknown()));
+const mediaObject = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string(),
+  file_id: z.string(),
+  url: z.string().url(),
+  type: z.enum(["image", "video", "audio"]),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+const mediaObjectsPlacementSchema = z.object({
+  placement_key: z.string(),
+  media_object: mediaObject,
+  caption: z.string().optional().or(z.literal("")),
+  alt_text: z.string().optional().or(z.literal("")),
+  meta_data: z.any(),
+});
 
 const articleSchema = z.object({
   id: z.string(),
@@ -51,9 +68,14 @@ export {
   articleStatusSchema,
   sourceTypeSchema,
   sourceSchema,
+  mediaObject,
   mediaObjectsPlacementSchema,
   articleSchema,
 };
 
 // Type inference
 export type IArticle = z.infer<typeof articleSchema>;
+export type IMediaObject = z.infer<typeof mediaObject>;
+export type IMediaObjectsPlacement = z.infer<
+  typeof mediaObjectsPlacementSchema
+>;

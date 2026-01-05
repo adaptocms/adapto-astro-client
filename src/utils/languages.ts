@@ -71,10 +71,6 @@ const getPageStaticPaths = async (
     });
   }
 
-  console.log(
-    `@@@@@@Generated ${paths.length} static paths for page "${pageSlug}"`,
-    paths
-  );
   return paths;
 };
 

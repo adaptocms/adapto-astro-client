@@ -1,8 +1,7 @@
 import { z } from "zod";
+import { mediaObjectsPlacementSchema } from "../articles";
 
 const pageStatusSchema = z.enum(["draft", "published", "archived", "deleted"]);
-
-const mediaObjectsPlacementSchema = z.record(z.unknown());
 
 const pageSchema = z.object({
   id: z.string(),
@@ -20,7 +19,7 @@ const pageSchema = z.object({
   translation_of_id: z.string().nullable(),
 });
 
-export { pageStatusSchema, mediaObjectsPlacementSchema, pageSchema };
+export { pageStatusSchema, pageSchema };
 
 // Type inference
 export type IPage = z.infer<typeof pageSchema>;
