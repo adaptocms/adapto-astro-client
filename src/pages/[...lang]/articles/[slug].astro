@@ -1,60 +1,66 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { getDefaultLanguage } from "../../../utils/languages.ts";
+import { getDefaultLanguage } from "../../../utils/languages";
+import { buildTranslationMap } from "../../../utils/translationMap";
 import { hydrateMediaPlacements } from "../../../utils/hydrateMediaPlacements";
 import { DEFAULT_LANGUAGE } from "../../../content.config";
 import type { IArticle } from "../../../schemas/articles";
 import type { ILanguageLink } from "../../../schemas/languages";
 
-export interface ArticlePath {
+interface IArticlePath {
   params: { slug: string; lang?: string };
-  props: { article: IArticle; translationLinks: ILanguageLink[] };
+  props: {
+    article: IArticle;
+    translationLinks: ILanguageLink[];
+  };
 }
 
-export async function getStaticPaths(): Promise<ArticlePath[]> {
-  const articles = await getCollection("articles");
-  const languages = await getCollection("languages");
-  const defaultLang = languages.find((l) => l.data.is_default)?.data.short;
+export async function getStaticPaths(): Promise<IArticlePath[]> {
+  const articles = (await getCollection("articles")).map((a) => a.data);
+  const languages = (await getCollection("languages")).map((l) => l.data);
+  const defaultLang = languages.find((l) => l.is_default)?.short || "en";
 
-  const paths: ArticlePath[] = [];
-  const groups: Record<string, IArticle[]> = {};
+  const translationMap = buildTranslationMap(articles, languages);
 
-  articles.forEach((article) => {
-    const groupId = article.data.translation_of_id ?? article.id;
-    if (!groups[groupId]) groups[groupId] = [];
-    groups[groupId].push(article.data);
-  });
+  const paths: IArticlePath[] = [];
 
-  for (const groupId in groups) {
-    const groupArticles = groups[groupId];
+  for (const groupId in translationMap) {
+    const group = translationMap[groupId];
+    const allTranslations = [
+      group.default,
+      ...Object.values(group.translations),
+    ];
 
-    // Always produce a translationLinks array
-    const translationLinks: ILanguageLink[] = [];
-    languages.forEach((language) => {
-      const lang = language.data.short;
-      const sibling = groupArticles.find(
-        (a) => a.language.split("-")[0] === lang
-      );
-      if (sibling) {
-        translationLinks.push({
-          lang,
-          href: `/${lang}/articles/${sibling.slug}`,
-        });
-      }
-    });
+    // Build translation links
+    const translationLinks: ILanguageLink[] = languages
+      .map((lang) => {
+        const langCode = lang.short;
+        const translated = allTranslations.find(
+          (a) => a.language.split("-")[0] === langCode
+        );
+        if (!translated) return null;
+        return {
+          lang: langCode,
+          href:
+            langCode === defaultLang
+              ? `/articles/${translated.slug}`
+              : `/${langCode}/articles/${translated.slug}`,
+        };
+      })
+      .filter(Boolean) as ILanguageLink[];
 
-    groupArticles.forEach((article) => {
-      const lang = article.language.split("-")[0];
-      const isDefault = lang === defaultLang;
+    allTranslations.forEach((article) => {
+      const langCode = article.language.split("-")[0];
+      const isDefault = langCode === defaultLang;
 
-      // Path with language prefix
+      // Prefixed URL
       paths.push({
-        params: { slug: article.slug, lang },
+        params: { slug: article.slug, lang: langCode },
         props: { article, translationLinks },
       });
 
-      // Path without prefix for default language
+      // Unprefixed for default language
       if (isDefault) {
         paths.push({
           params: { slug: article.slug, lang: undefined },
@@ -67,11 +73,10 @@ export async function getStaticPaths(): Promise<ArticlePath[]> {
   return paths;
 }
 
-const defaultLanguage = await getDefaultLanguage();
-
 const { article, translationLinks } = Astro.props;
 const { lang } = Astro.params;
-const currentLanguage = lang || defaultLanguage?.short || DEFAULT_LANGUAGE;
+const currentLang =
+  lang ?? (await getDefaultLanguage())?.short ?? DEFAULT_LANGUAGE;
 
 const renderedContent = hydrateMediaPlacements(
   article.content,
@@ -82,15 +87,12 @@ const renderedContent = hydrateMediaPlacements(
 <Layout
   pageTitle={article.title}
   links={translationLinks}
-  currentLang={currentLanguage}
+  currentLang={currentLang}
 >
-  <p>
-    <strong>Author: </strong>
-    {article.author}
-  </p>
-
+  <h1>{article.title}</h1>
+  <p><strong>Author:</strong> {article.author}</p>
   <div
-    style={{ fontStyle: "italic", fontSize: "0.9em" }}
     set:html={renderedContent}
+    style={{ fontStyle: "italic", fontSize: "0.9em" }}
   />
 </Layout>
