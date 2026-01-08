@@ -4,10 +4,13 @@ import { categorySchema, type ICategory } from "./schemas/categories";
 import { pageSchema, type IPage } from "./schemas/pages";
 import { microCopySchema, type IMicroCopy } from "./schemas/microCopies";
 import {
+  customCollectionItemSchema,
   customCollectionSchema,
   type ICustomCollection,
+  type ICustomCollectionItem,
 } from "./schemas/customCollections";
 import { languageSchema } from "./schemas/languages/schema";
+import { custom } from "astro:schema";
 
 const API_URL = import.meta.env.ADAPTO_API_URL;
 const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
@@ -15,7 +18,7 @@ const TENANT_ID = SECRET_KEY?.split(".")[1] || "";
 
 export const PAGE_SIZE = 2;
 export const DEFAULT_LANGUAGE = "en";
-const LIMIT =20
+const LIMIT = 20;
 
 const articlesCollection = defineCollection({
   loader: async () => {
@@ -125,6 +128,57 @@ const customCollectionsCollection = defineCollection({
   schema: customCollectionSchema,
 });
 
+const customCollectionItems = defineCollection({
+  loader: async () => {
+    try {
+      // 1. Fetch all parent collections
+      const collectionsRes = await fetch(
+        `${API_URL}/public/custom-collections`,
+        {
+          headers: { "x-api-key": SECRET_KEY },
+        }
+      );
+
+      if (!collectionsRes.ok) {
+        console.error(
+          `⚠️  Failed to fetch custom collections from CMS. Status: ${collectionsRes.status}`
+        );
+        return [];
+      }
+
+      const { items: collections } = await collectionsRes.json();
+
+      // 2. Map through collections and fetch their specific items
+      const allItemsNested = await Promise.all(
+        collections.map(async (collection: any) => {
+          const itemRes = await fetch(
+            `${API_URL}/public/custom-collections/${collection.id}/items`,
+            {
+              headers: { "x-api-key": SECRET_KEY },
+            }
+          );
+
+          if (!itemRes.ok) return []; // Skip failed collection fetches
+          const data = await itemRes.json();
+          return data.items;
+        })
+      );
+
+      // 3. Flatten the array of arrays into a single list of items
+      const flatItems = allItemsNested.flat();
+
+      // 4. Return the items formatted for Astro
+      return flatItems.map((item: ICustomCollectionItem) => ({
+        ...item,
+      }));
+    } catch (error) {
+      console.error("⚠️ Error loading custom collection items:", error);
+      return [];
+    }
+  },
+  schema: customCollectionItemSchema,
+});
+
 const microCopiesCollection = defineCollection({
   loader: async () => {
     try {
@@ -197,5 +251,6 @@ export const collections = {
   pages: pagesCollection,
   microCopies: microCopiesCollection,
   customCollections: customCollectionsCollection,
+  customCollectionItems: customCollectionItems,
   languages: languagesCollection,
 };

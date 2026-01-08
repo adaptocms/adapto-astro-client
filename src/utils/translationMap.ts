@@ -1,7 +1,4 @@
-import type { IArticle } from "../schemas/articles";
-import type { ICategory } from "../schemas/categories";
 import type { ILanguage } from "../schemas/languages";
-import type { IPage } from "../schemas/pages";
 
 export type ITranslationGroup<T> = {
   default: T; // the default language entity
@@ -47,4 +44,3 @@ export function buildTranslationMap<
 
   return groups;
 }
-

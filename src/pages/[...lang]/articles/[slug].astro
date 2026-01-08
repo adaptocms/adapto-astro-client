@@ -1,7 +1,6 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { getDefaultLanguage } from "../../../utils/languages";
 import { buildTranslationMap } from "../../../utils/translationMap";
 import { hydrateMediaPlacements } from "../../../utils/hydrateMediaPlacements";
 import { DEFAULT_LANGUAGE } from "../../../content.config";
@@ -27,6 +26,7 @@ export async function getStaticPaths(): Promise<IArticlePath[]> {
 
   for (const groupId in translationMap) {
     const group = translationMap[groupId];
+
     const allTranslations = [
       group.default,
       ...Object.values(group.translations),
@@ -75,8 +75,7 @@ export async function getStaticPaths(): Promise<IArticlePath[]> {
 
 const { article, translationLinks } = Astro.props;
 const { lang } = Astro.params;
-const currentLang =
-  lang ?? (await getDefaultLanguage())?.short ?? DEFAULT_LANGUAGE;
+const currentLang = lang || DEFAULT_LANGUAGE;
 
 const renderedContent = hydrateMediaPlacements(
   article.content,
@@ -89,6 +88,12 @@ const renderedContent = hydrateMediaPlacements(
   links={translationLinks}
   currentLang={currentLang}
 >
+  <a
+    href={lang ? `/${lang}/articles/categories` : "/articles/categories"}
+    class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+  >
+    &larr; Go back to articles
+  </a>
   <h1>{article.title}</h1>
   <p><strong>Author:</strong> {article.author}</p>
   <div

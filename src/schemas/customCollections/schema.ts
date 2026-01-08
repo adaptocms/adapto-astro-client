@@ -31,8 +31,9 @@ const fieldSchema = z.object({
   required: z.boolean(),
   description: z.string().nullable(),
   default_value: z.any().nullable(),
-  options: z.array(z.record(z.unknown())),
-  validation: z.record(z.unknown()),
+  related_collection: z.string().nullable(),
+  options: z.array(z.record(z.unknown())).nullable(),
+  validation: z.record(z.unknown()).nullable(),
 });
 
 const customCollectionSchema = z.object({
@@ -47,8 +48,23 @@ const customCollectionSchema = z.object({
   updated_at: z.string().nullable(),
 });
 
+const customCollectionItemSchema = z.object({
+  id: z.string(),
+  collection_id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  data: z.record(z.any()),
+  language: z.string(),
+  status: customCollectionStatusSchema,
+  created_at: z.string(),
+  updated_at: z.string(),
+  published_at: z.string().nullable(),
+  translation_of_id: z.string().nullable(),
+});
+
 export {
   customCollectionStatusSchema,
+  customCollectionItemSchema,
   fieldTypeSchema,
   fieldSchema,
   customCollectionSchema,
@@ -56,3 +72,4 @@ export {
 
 // Type inference
 export type ICustomCollection = z.infer<typeof customCollectionSchema>;
+export type ICustomCollectionItem = z.infer<typeof customCollectionItemSchema>;

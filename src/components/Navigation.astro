@@ -1,15 +1,24 @@
 ---
+import { getCollection } from "astro:content";
+
 interface IProps {
   langPrefix?: string;
 }
 
 const { langPrefix } = Astro.props as IProps;
 
+const customCollections = await getCollection("customCollections");
+
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/articles/categories", label: "Articles" },
-  { href: "/custom-collections", label: "Custom Collections" },
 ];
+customCollections.forEach((collection) => {
+  navItems.push({
+    href: `/${collection.data.slug}`,
+    label: collection.data.name,
+  });
+});
 ---
 
 <div style="display: flex; gap: 1rem;">
