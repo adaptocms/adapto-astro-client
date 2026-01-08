@@ -10,15 +10,22 @@ import {
   type ICustomCollectionItem,
 } from "./schemas/customCollections";
 import { languageSchema } from "./schemas/languages/schema";
-import { custom } from "astro:schema";
 
 const API_URL = import.meta.env.ADAPTO_API_URL;
 const SECRET_KEY = import.meta.env.ADAPTO_SECRET_KEY;
 const TENANT_ID = SECRET_KEY?.split(".")[1] || "";
+const LIMIT = 100;
 
 export const PAGE_SIZE = 2;
 export const DEFAULT_LANGUAGE = "en";
-const LIMIT = 20;
+export const CUSTOM_COLLECTIONS: { id: string; name: string; slug: string }[] =
+  [
+    {
+      id: "f8358a58-d632-43fe-954c-5c49953554ca",
+      name: "Showcase",
+      slug: "showcase",
+    },
+  ];
 
 const articlesCollection = defineCollection({
   loader: async () => {

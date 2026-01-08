@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { DEFAULT_LANGUAGE } from "../../../content.config";
+import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../content.config";
 import type { ILanguageLink } from "../../../schemas/languages";
 import type {
   ICustomCollection,
@@ -31,8 +31,17 @@ export async function getStaticPaths() {
   const defaultLang =
     languages.find((l) => l.is_default)?.short || DEFAULT_LANGUAGE;
 
+  // Only include collections NOT in CUSTOM_COLLECTIONS (e.g., skip showcase)
+  const filteredCollections = allCollections.filter(
+    (c) => !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
+  );
+
+  const filteredItems = allItems.filter((item) =>
+    filteredCollections.some((c) => c.data.id === item.data.collection_id)
+  );
+
   // 1. Convert Astro entries to raw data for the utility
-  const itemsData = allItems.map((i) => i.data);
+  const itemsData = filteredItems.map((i) => i.data);
 
   // 2. Build the map (this handles the translation_of_id logic)
   const translationMap = buildTranslationMap(itemsData, languages);

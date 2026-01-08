@@ -14,13 +14,12 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const allItems = await getCollection("customCollectionItems");
   const collections = await getCollection("customCollections");
 
-  const validCollections = collections.filter(
-    (c) =>
-      c.data.slug !== "articles" &&
-      !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
+  // Only include the "showcase" custom collection(s)
+  const showcaseCollections = collections.filter((c) =>
+    CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
   );
 
-  const allPaths = validCollections.flatMap((collectionEntry) => {
+  const allPaths = showcaseCollections.flatMap((collectionEntry) => {
     const collection = collectionEntry.data;
 
     const collectionItems = allItems.filter(
@@ -56,7 +55,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
         const paths = [];
 
-        // /en/collection-slug
+        // /en/showcase-slug
         paths.push({
           params: { lang, collection_slug: collection.slug, page: pageParam },
           props: res.props,
@@ -85,7 +84,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 const { page, collection, translationLinks } = Astro.props;
 const { lang } = Astro.params;
 
-const urlBase = lang ? `/${lang}/${collection.slug}` : `/${collection.slug}`;
+const urlBase = lang ? `/${lang}/showcase` : `/showcase`;
 ---
 
 <Layout
@@ -93,6 +92,10 @@ const urlBase = lang ? `/${lang}/${collection.slug}` : `/${collection.slug}`;
   currentLang={lang || DEFAULT_LANGUAGE}
   links={translationLinks}
 >
+  <div style="color: red;">
+    This is our custom collection showcase page that is not dynamically
+    generated.
+  </div>
   {
     page.data.length === 0 ? (
       <div class="text-gray-500 italic">
@@ -110,9 +113,6 @@ const urlBase = lang ? `/${lang}/${collection.slug}` : `/${collection.slug}`;
   }
 
   <div class="mt-12">
-    <Pagination
-      page={page}
-      basePath={`${lang || DEFAULT_LANGUAGE}/${collection.slug}`}
-    />
+    <Pagination page={page} basePath={`${lang || DEFAULT_LANGUAGE}/showcase`} />
   </div>
 </Layout>
