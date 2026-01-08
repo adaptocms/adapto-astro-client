@@ -1,0 +1,24 @@
+---
+import { getCollection } from "astro:content";
+import { getDefaultLanguage, getFullLanguageCode } from "../utils/languages.ts";
+
+type IProps = {
+  key: string;
+  lang?: string; // optional short language code
+};
+
+const { key, lang } = Astro.props as IProps;
+
+const microCopies = await getCollection("microCopies");
+const defaultLanguage = await getDefaultLanguage();
+
+const language = lang ? await getFullLanguageCode(lang) : defaultLanguage?.code;
+
+const microCopy = microCopies.find((microCopy) =>
+  language
+    ? microCopy.data.key === key && microCopy.data.language === language
+    : microCopy.data.key === key
+);
+---
+
+{microCopy?.data.value || "Microcopy not found"}

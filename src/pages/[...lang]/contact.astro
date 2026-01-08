@@ -1,0 +1,97 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Microcopy from "../../components/Microcopy.astro";
+import {
+  getDefaultLanguage,
+  getPageStaticPaths,
+} from "../../utils/languages.ts";
+import { hydrateMediaPlacements } from "../../utils/hydrateMediaPlacements";
+import type { ILanguageLink } from "../../schemas/languages";
+import type { IPage } from "../../schemas/pages";
+
+const defaultLanguage = await getDefaultLanguage();
+
+export async function getStaticPaths() {
+  return await getPageStaticPaths("contact");
+}
+
+const { lang, translations } = Astro.props as {
+  lang: string;
+  translations: Record<string, IPage>;
+};
+
+const translationLinks: ILanguageLink[] = Object.keys(translations).map(
+  (lang) => ({
+    lang,
+    href: `/${lang}/contact`,
+  })
+);
+
+const activeLangKey = lang || defaultLanguage?.short || "en";
+const currentPage = translations[activeLangKey];
+const pageTitle = currentPage ? currentPage.title : "Contact Us";
+const content = hydrateMediaPlacements(
+  currentPage ? currentPage.content : "",
+  currentPage ? currentPage.media_objects_placements : []
+);
+---
+
+<Layout
+  pageTitle={pageTitle}
+  links={translationLinks}
+  currentLang={activeLangKey}
+>
+  {
+    currentPage && (
+      <main>
+        <div set:html={content} />
+      </main>
+    )
+  }
+  <main class="container mx-auto px-4 py-8">
+    <p>this form is hardcoded</p>
+    <form class="max-w-lg mx-auto">
+      <div class="mb-4">
+        <label for="name" class="block text-gray-700 font-bold mb-2">Name</label
+        >
+        <input
+          type="text"
+          id="name"
+          name="name"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+      <div class="mb-4">
+        <label for="email" class="block text-gray-700 font-bold mb-2"
+          >Email</label
+        >
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+      <div class="mb-6">
+        <label for="message" class="block text-gray-700 font-bold mb-2"
+          >Message</label
+        >
+        <textarea
+          id="message"
+          name="message"
+          rows="5"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        ></textarea>
+      </div>
+      <div class="flex items-center justify-center">
+        <p>this button has microcopy</p>
+        <button
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          <Microcopy key="contact_btn" lang={lang} />
+        </button>
+      </div>
+    </form>
+  </main>
+</Layout>

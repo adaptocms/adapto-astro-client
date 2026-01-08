@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+import type { ILanguageLink } from "../schemas/languages";
+
+interface IProps {
+  currentLang: string;
+  links: ILanguageLink[];
+}
+const availableLanguages = await getCollection("languages");
+const { currentLang, links } = Astro.props as IProps;
+---
+
+{
+  availableLanguages.length > 1 && (
+    <div style="display: flex; align-items: center;">
+      <select
+        id="language-switch"
+        style="padding: 4px 8px; border-radius: 4px;"
+      >
+        {(links || []).map((link) => (
+          <option value={link.href ?? ""} selected={link.lang === currentLang}>
+            {link.lang.toUpperCase()}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+<script>
+  document
+    .getElementById("language-switch")
+    ?.addEventListener("change", (e) => {
+      if (e.target instanceof HTMLSelectElement) {
+        window.location.href = e.target.value;
+      }
+    });
+</script>

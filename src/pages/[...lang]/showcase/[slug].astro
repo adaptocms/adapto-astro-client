@@ -1,0 +1,141 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../content.config";
+import type { ILanguageLink } from "../../../schemas/languages";
+import { buildTranslationMap } from "../../../utils/translationMap";
+import type {
+  ICustomCollection,
+  ICustomCollectionItem,
+} from "../../../schemas/customCollections";
+
+interface IShowcaseItemPath {
+  params: {
+    lang: string | undefined;
+    slug: string;
+  };
+  props: {
+    item: ICustomCollectionItem;
+    collection: ICustomCollection;
+    langCode: string | undefined;
+    translationLinks: ILanguageLink[];
+  };
+}
+
+export async function getStaticPaths() {
+  const allItems = await getCollection("customCollectionItems");
+  const allCollections = await getCollection("customCollections");
+  const languages = (await getCollection("languages")).map((l) => l.data);
+
+  const defaultLang =
+    languages.find((l) => l.is_default)?.short || DEFAULT_LANGUAGE;
+
+  // Only showcase collections
+  const showcaseCollections = allCollections.filter((c) =>
+    CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
+  );
+
+  const paths: IShowcaseItemPath[] = [];
+
+  const showcaseItems = allItems.filter((item) =>
+    showcaseCollections.some((c) => c.data.id === item.data.collection_id)
+  );
+
+  const itemsData = showcaseItems.map((i) => i.data);
+  const translationMap = buildTranslationMap(itemsData, languages);
+
+  for (const groupId in translationMap) {
+    const group = translationMap[groupId];
+    const allTranslations = [
+      group.default,
+      ...Object.values(group.translations),
+    ].filter(Boolean);
+
+    allTranslations.forEach((item) => {
+      const langCode = item.language.split("-")[0];
+      const isDefault = langCode === defaultLang;
+
+      const parentCol = showcaseCollections.find(
+        (c) => c.data.id === item.collection_id
+      );
+      if (!parentCol) return;
+
+      const translationLinks: ILanguageLink[] = allTranslations.map((tr) => {
+        const trLang = tr.language.split("-")[0];
+        return {
+          lang: trLang,
+          href:
+            trLang === defaultLang
+              ? `/showcase/${tr.slug}`
+              : `/${trLang}/showcase/${tr.slug}`,
+        };
+      });
+
+      const baseParams = { slug: item.slug };
+
+      paths.push({
+        params: { lang: langCode, ...baseParams },
+        props: { item, collection: parentCol.data, langCode, translationLinks },
+      });
+
+      if (isDefault) {
+        paths.push({
+          params: { lang: undefined, ...baseParams },
+          props: {
+            item,
+            collection: parentCol.data,
+            langCode: undefined,
+            translationLinks,
+          },
+        });
+      }
+    });
+  }
+
+  return paths;
+}
+
+const { item, collection, langCode, translationLinks } = Astro.props;
+
+const urlBase = langCode ? `/${langCode}/showcase` : `/showcase`;
+---
+
+<Layout links={translationLinks} currentLang={langCode}>
+  <article class="container mx-auto px-4 py-12 max-w-3xl space-y-6">
+    <header class="border-b pb-4 mb-6">
+      <h1 class="text-4xl font-bold">{item.title}</h1>
+      {
+        item.data.client_sector && (
+          <p class="text-gray-500 italic mt-1">
+            Sector: {item.data.client_sector}
+          </p>
+        )
+      }
+    </header>
+
+    <div style="color: red;">
+      This is our custom collection showcase item page that is not dynamically
+      generated.
+    </div>
+
+    {
+      item.data.image && (
+        <img
+          src={item.data.image}
+          alt={item.title}
+          class="rounded-lg shadow-md w-full max-h-[400px] object-cover"
+        />
+      )
+    }
+
+    {
+      item.data.content && (
+        <div class="prose prose-blue" set:html={item.data.content} />
+      )
+    }
+
+    <a href={urlBase} class="inline-block mt-6 text-blue-600 hover:underline">
+      &larr; Back to Showcase
+    </a>
+  </article>
+</Layout>

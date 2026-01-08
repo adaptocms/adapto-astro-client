@@ -1,0 +1,119 @@
+---
+import { getCollection } from "astro:content";
+import type { GetStaticPathsOptions } from "astro";
+import Layout from "../../../../../layouts/Layout.astro";
+import Pagination from "../../../../../components/Pagination.astro";
+import { PAGE_SIZE, DEFAULT_LANGUAGE } from "../../../../../content.config";
+import type { ILanguageLink } from "../../../../../schemas/languages";
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const articles = await getCollection("articles");
+  const categories = await getCollection("categories");
+
+  return categories.flatMap((categoryEntry) => {
+    const category = categoryEntry.data;
+    const categoryLang = category.language.split("-")[0];
+    const isDefault = categoryLang === DEFAULT_LANGUAGE;
+
+    // ---- find all translations of THIS category
+    const groupId = category.translation_of_id || category.id;
+    const categoryGroup = categories
+      .map((category) => category.data)
+      .filter(
+        (category) =>
+          category.id === groupId || category.translation_of_id === groupId
+      );
+
+    const translationLinks: ILanguageLink[] = categoryGroup.map((c) => {
+      const lang = c.language.split("-")[0];
+      return {
+        lang,
+        href: `/${lang}/articles/category/${c.slug}`,
+      };
+    });
+
+    const filteredArticles = articles.filter((article) => {
+      const articleLang = article.data.language.split("-")[0];
+      return (
+        article.data.categories.some((c) => c === category.id) &&
+        articleLang === categoryLang
+      );
+    });
+
+    const paginatedResult = paginate(filteredArticles, {
+      pageSize: PAGE_SIZE,
+      params: { category: category.slug },
+      props: { category, translationLinks },
+    });
+
+    return paginatedResult.flatMap((res) => {
+      const { currentPage } = res.props.page;
+      const pageParam = currentPage === 1 ? undefined : String(currentPage);
+
+      const paths = [];
+
+      // 1. Standard path (e.g., /es/articles/...)
+      paths.push({
+        params: {
+          lang: categoryLang,
+          category: category.slug,
+          page: pageParam,
+        },
+        props: { ...res.props, lang: categoryLang },
+      });
+
+      // 2. EXTRA path for Default Language ONLY (e.g., /articles/...)
+      if (isDefault) {
+        paths.push({
+          params: {
+            lang: undefined,
+            category: category.slug,
+            page: pageParam,
+          },
+          props: { ...res.props, lang: categoryLang },
+        });
+      }
+
+      return paths;
+    });
+  });
+}
+
+const { page, category, lang, translationLinks } = Astro.props;
+const pageTitle = `Category: ${category.name} (${lang.toUpperCase()})`;
+---
+
+<Layout pageTitle={pageTitle} currentLang={lang} links={translationLinks}>
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold">{category.name}</h1>
+    {
+      category.description && (
+        <div class="mt-2 text-gray-600" set:html={category.description} />
+      )
+    }
+  </header>
+
+  <ul class="space-y-4">
+    {
+      page.data.map((article) => (
+        <li>
+          <a
+            href={
+              lang === DEFAULT_LANGUAGE
+                ? `/articles/${article.data.slug}`
+                : `/${lang}/articles/${article.data.slug}`
+            }
+            class="text-xl text-blue-600 hover:underline"
+          >
+            {article.data.title}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <Pagination
+    page={page}
+    basePath={`${lang}/articles/category/${category.slug}`}
+  />
+</Layout>

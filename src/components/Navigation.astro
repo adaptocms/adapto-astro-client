@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+
+interface IProps {
+  langPrefix?: string;
+}
+
+const { langPrefix } = Astro.props as IProps;
+
+const customCollections = await getCollection("customCollections");
+
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/articles/categories", label: "Articles" },
+];
+customCollections.forEach((collection) => {
+  navItems.push({
+    href: `/${collection.data.slug}`,
+    label: collection.data.name,
+  });
+});
+---
+
+<div style="display: flex; gap: 1rem;">
+  {
+    navItems.map((item) => {
+      return (
+        <a
+          href={langPrefix ? `/${langPrefix}${item.href}` : item.href}
+          style="margin-right: 1.5rem;"
+          class="hover:underline"
+        >
+          {item.label}
+        </a>
+      );
+    })
+  }
+</div>
