@@ -5,7 +5,7 @@ type ILanguagePathParams = {
 
 type ILanguageLink = {
   lang: string;
-  href?: string; // undefined = disabled
+  href: string;
 };
 
 export * from "./schema.ts";

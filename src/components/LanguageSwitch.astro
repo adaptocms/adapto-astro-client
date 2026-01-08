@@ -18,11 +18,7 @@ const { currentLang, links } = Astro.props as IProps;
         style="padding: 4px 8px; border-radius: 4px;"
       >
         {(links || []).map((link) => (
-          <option
-            value={link.href ?? ""}
-            disabled={!link.href}
-            selected={link.lang === currentLang}
-          >
+          <option value={link.href ?? ""} selected={link.lang === currentLang}>
             {link.lang.toUpperCase()}
           </option>
         ))}

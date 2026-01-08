@@ -10,17 +10,41 @@ type IProps = {
   links?: ILanguageLink[];
 };
 
+// 1. Get the current path from Astro.url
+const pathname = Astro.url.pathname;
+
+// 2. Remove the default language prefix if it exists
+const segments = pathname.split("/").filter(Boolean);
+const isDefaultPrefix = segments[0] === DEFAULT_LANGUAGE;
+
+const canonicalPath = isDefaultPrefix
+  ? "/" + segments.slice(1).join("/")
+  : pathname;
+
+// 3. Construct the full URL (Ensure trailing slash consistency)
+const canonicalURL = new URL(canonicalPath, Astro.site);
+
 const { pageTitle, currentLang, links } = Astro.props as IProps;
 ---
 
 <!doctype html>
-<html lang={DEFAULT_LANGUAGE}>
+<html lang={currentLang || DEFAULT_LANGUAGE}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
+    <link rel="canonical" href={canonicalURL.href} />
+    {
+      links?.map((link) => (
+        <link
+          rel="alternate"
+          hreflang={link.lang}
+          href={new URL(link.href, Astro.site).href}
+        />
+      ))
+    }
   </head>
   <body>
     <Header currentLang={currentLang} links={links} />
