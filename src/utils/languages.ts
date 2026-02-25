@@ -1,6 +1,9 @@
 import { getCollection } from "astro:content";
-import type { ILanguage, ILanguagePathParams } from "../schemas/languages";
-import type { IPage } from "../schemas/pages";
+import type {
+  ILanguage,
+  ILanguagePathParams,
+} from "../content/schemas/languages";
+import type { IPage } from "../content/schemas/pages";
 
 const getDefaultLanguage = async (): Promise<ILanguage | null> => {
   const languages = await getCollection("languages");
@@ -8,7 +11,7 @@ const getDefaultLanguage = async (): Promise<ILanguage | null> => {
 };
 
 const getFullLanguageCode = async (
-  shortCode: string
+  shortCode: string,
 ): Promise<string | undefined> => {
   const languages = await getCollection("languages");
   return languages.find((l) => l.data.short === shortCode)?.data.code;
@@ -16,14 +19,14 @@ const getFullLanguageCode = async (
 
 const hasLanguagePrefixInUrl = async (pathname: string): Promise<boolean> => {
   const availableLanguages = await getCollection("languages").then((langs) =>
-    langs.map((language) => language.data.short)
+    langs.map((language) => language.data.short),
   );
 
   return availableLanguages.includes(pathname.split("/")[1]);
 };
 
 const getPagesWithTranslations = async (
-  page: string
+  page: string,
 ): Promise<Record<string, IPage>> => {
   const pages: IPage[] = (await getCollection("pages")).map((p) => p.data);
   const pageTranslations: Record<string, IPage> = {};
@@ -48,7 +51,7 @@ const getPagesWithTranslations = async (
  * Adds translation data to props for easier access in pages.
  */
 const getPageStaticPaths = async (
-  pageSlug: string
+  pageSlug: string,
 ): Promise<ILanguagePathParams[]> => {
   const pageTranslations = await getPagesWithTranslations(pageSlug);
 

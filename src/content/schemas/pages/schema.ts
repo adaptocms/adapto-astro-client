@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mediaObjectsPlacementSchema } from "../articles";
+import { customFieldSchema, mediaObjectsPlacementSchema } from "../shared";
 
 const pageStatusSchema = z.enum(["draft", "published", "archived", "deleted"]);
 
@@ -17,6 +17,8 @@ const pageSchema = z.object({
   published_at: z.string().nullable(),
   media_objects_placements: z.array(mediaObjectsPlacementSchema),
   translation_of_id: z.string().nullable(),
+  custom_fields: z.record(customFieldSchema).default({}),
+  file_urls: z.record(z.string()).nullable().optional(),
 });
 
 export { pageStatusSchema, pageSchema };

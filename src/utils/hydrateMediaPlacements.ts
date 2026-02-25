@@ -1,8 +1,8 @@
-import type { IMediaObjectsPlacement } from "../schemas/articles";
+import type { IMediaObjectsPlacement } from "../content/schemas/articles";
 
 export function hydrateMediaPlacements(
   html: string,
-  mediaObjectsPlacements: IMediaObjectsPlacement[]
+  mediaObjectsPlacements: IMediaObjectsPlacement[],
 ): string {
   for (const placement of mediaObjectsPlacements || []) {
     const { placement_key, media_object, alt_text, caption } = placement;
@@ -25,7 +25,7 @@ export function hydrateMediaPlacements(
 
     const pattern = `<media-object[^>]*key=['"]${placement_key.replace(
       "$",
-      "\\$"
+      "\\$",
     )}['"][^>]*>\\s*<\\/media-object>`;
 
     html = html.replace(new RegExp(pattern, "g"), imgHtml);

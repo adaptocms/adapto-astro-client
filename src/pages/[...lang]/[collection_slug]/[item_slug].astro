@@ -1,13 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../content.config";
-import type { ILanguageLink } from "../../../schemas/languages";
+import { buildTranslationMap } from "../../../utils/translationMap";
+import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../../settings.ts";
+import type { ILanguageLink } from "../../../content/schemas/languages";
 import type {
   ICustomCollection,
   ICustomCollectionItem,
-} from "../../../schemas/customCollections";
-import { buildTranslationMap } from "../../../utils/translationMap";
+} from "../../../content/schemas/customCollections";
 
 interface ICollectionItemPath {
   params: {
@@ -33,11 +33,11 @@ export async function getStaticPaths() {
 
   // Only include collections NOT in CUSTOM_COLLECTIONS (e.g., skip showcase)
   const filteredCollections = allCollections.filter(
-    (c) => !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
+    (c) => !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug),
   );
 
   const filteredItems = allItems.filter((item) =>
-    filteredCollections.some((c) => c.data.id === item.data.collection_id)
+    filteredCollections.some((c) => c.data.id === item.data.collection_id),
   );
 
   // 1. Convert Astro entries to raw data for the utility
@@ -61,7 +61,7 @@ export async function getStaticPaths() {
 
       // 3. Find the parent collection for the slug
       const parentCol = allCollections.find(
-        (c) => c.data.id === item.collection_id
+        (c) => c.data.id === item.collection_id,
       );
       if (!parentCol) return;
 

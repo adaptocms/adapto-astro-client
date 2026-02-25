@@ -1,9 +1,9 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { DEFAULT_LANGUAGE } from "../../../content.config";
-import type { ICategory } from "../../../schemas/categories";
-import type { ILanguageLink } from "../../../schemas/languages";
+import { DEFAULT_LANGUAGE } from "../../../../settings.ts";
+import type { ICategory } from "../../../content/schemas/categories";
+import type { ILanguageLink } from "../../../content/schemas/languages";
 
 interface ICategoryPath {
   params: { lang?: string };
@@ -30,7 +30,7 @@ export async function getStaticPaths(): Promise<ICategoryPath[]> {
   });
 
   const translationLinks: ILanguageLink[] = Object.keys(
-    categoriesByLanguage
+    categoriesByLanguage,
   ).map((langCode) => {
     return {
       lang: langCode,

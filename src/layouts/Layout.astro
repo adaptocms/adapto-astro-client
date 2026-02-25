@@ -1,8 +1,8 @@
 ---
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
-import { DEFAULT_LANGUAGE } from "../content.config";
-import type { ILanguageLink } from "../schemas/languages";
+import { DEFAULT_LANGUAGE } from "../../settings.ts";
+import type { ILanguageLink } from "../content/schemas/languages";
 
 type IProps = {
   pageTitle: string;

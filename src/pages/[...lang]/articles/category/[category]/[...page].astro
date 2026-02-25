@@ -3,8 +3,11 @@ import { getCollection } from "astro:content";
 import type { GetStaticPathsOptions } from "astro";
 import Layout from "../../../../../layouts/Layout.astro";
 import Pagination from "../../../../../components/Pagination.astro";
-import { PAGE_SIZE, DEFAULT_LANGUAGE } from "../../../../../content.config";
-import type { ILanguageLink } from "../../../../../schemas/languages";
+import {
+  DEFAULT_LANGUAGE,
+  ARTICLES_PER_PAGE,
+} from "../../../../../../settings.ts";
+import type { ILanguageLink } from "../../../../../content/schemas/languages";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const articles = await getCollection("articles");
@@ -21,7 +24,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
       .map((category) => category.data)
       .filter(
         (category) =>
-          category.id === groupId || category.translation_of_id === groupId
+          category.id === groupId || category.translation_of_id === groupId,
       );
 
     const translationLinks: ILanguageLink[] = categoryGroup.map((c) => {
@@ -41,7 +44,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     });
 
     const paginatedResult = paginate(filteredArticles, {
-      pageSize: PAGE_SIZE,
+      pageSize: ARTICLES_PER_PAGE,
       params: { category: category.slug },
       props: { category, translationLinks },
     });

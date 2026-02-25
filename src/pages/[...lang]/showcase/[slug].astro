@@ -1,13 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../content.config";
-import type { ILanguageLink } from "../../../schemas/languages";
 import { buildTranslationMap } from "../../../utils/translationMap";
+import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../../settings.ts";
+import type { ILanguageLink } from "../../../content/schemas/languages";
 import type {
   ICustomCollection,
   ICustomCollectionItem,
-} from "../../../schemas/customCollections";
+} from "../../../content/schemas/customCollections";
 
 interface IShowcaseItemPath {
   params: {
@@ -32,13 +32,13 @@ export async function getStaticPaths() {
 
   // Only showcase collections
   const showcaseCollections = allCollections.filter((c) =>
-    CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
+    CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug),
   );
 
   const paths: IShowcaseItemPath[] = [];
 
   const showcaseItems = allItems.filter((item) =>
-    showcaseCollections.some((c) => c.data.id === item.data.collection_id)
+    showcaseCollections.some((c) => c.data.id === item.data.collection_id),
   );
 
   const itemsData = showcaseItems.map((i) => i.data);
@@ -56,7 +56,7 @@ export async function getStaticPaths() {
       const isDefault = langCode === defaultLang;
 
       const parentCol = showcaseCollections.find(
-        (c) => c.data.id === item.collection_id
+        (c) => c.data.id === item.collection_id,
       );
       if (!parentCol) return;
 

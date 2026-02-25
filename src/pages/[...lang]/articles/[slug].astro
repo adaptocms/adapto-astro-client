@@ -3,9 +3,9 @@ import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
 import { buildTranslationMap } from "../../../utils/translationMap";
 import { hydrateMediaPlacements } from "../../../utils/hydrateMediaPlacements";
-import { DEFAULT_LANGUAGE } from "../../../content.config";
-import type { IArticle } from "../../../schemas/articles";
-import type { ILanguageLink } from "../../../schemas/languages";
+import { DEFAULT_LANGUAGE } from "../../../../settings.ts";
+import type { IArticle } from "../../../content/schemas/articles";
+import type { ILanguageLink } from "../../../content/schemas/languages";
 
 interface IArticlePath {
   params: { slug: string; lang?: string };
@@ -37,7 +37,7 @@ export async function getStaticPaths(): Promise<IArticlePath[]> {
       .map((lang) => {
         const langCode = lang.short;
         const translated = allTranslations.find(
-          (a) => a.language.split("-")[0] === langCode
+          (a) => a.language.split("-")[0] === langCode,
         );
         if (!translated) return null;
         return {
@@ -79,7 +79,7 @@ const currentLang = lang || DEFAULT_LANGUAGE;
 
 const renderedContent = hydrateMediaPlacements(
   article.content,
-  article.media_objects_placements
+  article.media_objects_placements,
 );
 ---
 

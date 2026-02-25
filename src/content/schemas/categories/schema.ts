@@ -1,4 +1,5 @@
 import { z } from "astro:content";
+import { customFieldSchema } from "../shared";
 
 const categorySchema = z.object({
   id: z.string(),
@@ -10,6 +11,8 @@ const categorySchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   translation_of_id: z.string().nullable(),
+  custom_fields: z.record(customFieldSchema).default({}),
+  file_urls: z.record(z.string()).nullable().optional(),
 });
 
 export { categorySchema };
