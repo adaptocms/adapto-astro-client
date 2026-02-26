@@ -1,4 +1,4 @@
-import { z } from "astro:content";
+import { z } from "zod";
 import { customFieldSchema } from "../shared";
 
 const categorySchema = z.object({
