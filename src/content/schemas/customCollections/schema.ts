@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  customFieldSchema,
-  customFieldTypeSchema,
-  mediaObjectsPlacementSchema,
-} from "../shared";
+import { customFieldTypeSchema, mediaObjectsPlacementSchema } from "../shared";
 
 const customCollectionStatusSchema = z.enum([
   "draft",
@@ -12,32 +8,36 @@ const customCollectionStatusSchema = z.enum([
   "deleted",
 ]);
 
+const fieldTypeSchema = z.enum([
+  ...customFieldTypeSchema.options,
+  "select",
+  "multi_select",
+]);
+
 // We use the shared Type Enum, but keep specific validation for definitions (Name/Label required)
 const fieldSchema = z.object({
   name: z.string(),
   label: z.string(),
-  type: customFieldTypeSchema, // Using shared Enum
+  type: fieldTypeSchema,
   required: z.boolean().default(false),
+  multiple: z.boolean().default(false),
   description: z.string().nullable().optional(),
   default_value: z.any().optional(),
   related_collection: z.string().nullable().optional(),
   options: z.array(z.record(z.string())).nullable().optional(),
   validation: z.record(z.any()).nullable().optional(),
-  multiple: z.boolean().default(false),
 });
 
 const customCollectionSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
-  description: z.string().nullable(),
+  description: z.string(),
   language: z.string(),
   fields: z.array(fieldSchema),
   status: customCollectionStatusSchema,
   created_at: z.string(),
   updated_at: z.string(),
-  translation_of_id: z.string().nullable().optional(),
-  custom_fields: z.record(customFieldSchema).default({}),
 });
 
 const customCollectionItemSchema = z.object({
@@ -52,10 +52,9 @@ const customCollectionItemSchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   published_at: z.string().nullable(),
-  translation_of_id: z.string().nullable(),
   media_objects_placements: z.array(mediaObjectsPlacementSchema).default([]),
+  translation_of_id: z.string().nullable(),
   meta_data: z.record(z.any()).nullable().optional(),
-  custom_fields: z.record(customFieldSchema).default({}),
   file_urls: z.record(z.string()).nullable().optional(),
 });
 
