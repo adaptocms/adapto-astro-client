@@ -7,29 +7,21 @@ const customFieldTypeSchema = z.enum([
   "date",
   "date_range",
   "boolean",
-  "select",
-  "multi_select",
   "reference",
   "image",
   "file",
-  "rich_text",
   "url",
   "email",
   "color",
+  "rich_text",
 ]);
 
 const customFieldSchema = z.object({
   type: customFieldTypeSchema,
   multiple: z.boolean().default(false),
-  related_collection: z.string().nullable().optional(),
+  related_collection: z.string().nullable(),
+  media_objects_placements: z.array(z.record(z.any())).default([]),
   value: z.any().optional(),
-  // name: z.string().optional(),
-  // label: z.string().optional(),
-  // required: z.boolean().default(false).optional(),
-  // description: z.string().nullable().optional(),
-  // default_value: z.any().optional(),
-  // options: z.array(z.record(z.string())).nullable().optional(),
-  // validation: z.record(z.any()).nullable().optional(),
 });
 
 const mediaObject = z.object({
@@ -62,8 +54,15 @@ const mediaObjectsPlacementSchema = z.object({
   meta_data: z.any(),
 });
 
-export { customFieldTypeSchema, customFieldSchema, mediaObject, mediaObjectsPlacementSchema };
+export {
+  customFieldTypeSchema,
+  customFieldSchema,
+  mediaObject,
+  mediaObjectsPlacementSchema,
+};
 export type ICustomField = z.infer<typeof customFieldSchema>;
 export type ICustomFieldType = z.infer<typeof customFieldTypeSchema>;
 export type IMediaObject = z.infer<typeof mediaObject>;
-export type IMediaObjectsPlacement = z.infer<typeof mediaObjectsPlacementSchema>;
+export type IMediaObjectsPlacement = z.infer<
+  typeof mediaObjectsPlacementSchema
+>;

@@ -1,7 +1,16 @@
 import { z } from "zod";
-import { customFieldSchema, customFieldTypeSchema, mediaObjectsPlacementSchema } from "../shared";
+import {
+  customFieldSchema,
+  customFieldTypeSchema,
+  mediaObjectsPlacementSchema,
+} from "../shared";
 
-const customCollectionStatusSchema = z.enum(["draft", "published", "archived", "deleted"]);
+const customCollectionStatusSchema = z.enum([
+  "draft",
+  "published",
+  "archived",
+  "deleted",
+]);
 
 // We use the shared Type Enum, but keep specific validation for definitions (Name/Label required)
 const fieldSchema = z.object({
@@ -50,7 +59,12 @@ const customCollectionItemSchema = z.object({
   file_urls: z.record(z.string()).nullable().optional(),
 });
 
-export { customCollectionStatusSchema, customCollectionItemSchema, fieldSchema, customCollectionSchema };
+export {
+  customCollectionStatusSchema,
+  customCollectionItemSchema,
+  fieldSchema,
+  customCollectionSchema,
+};
 
 // Type inference
 export type ICustomCollection = z.infer<typeof customCollectionSchema>;

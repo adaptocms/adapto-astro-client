@@ -3,9 +3,19 @@ import { customFieldSchema, mediaObjectsPlacementSchema } from "../shared";
 
 const unixTimestampSchema = z.number();
 
-const articleStatusSchema = z.enum(["draft", "published", "archived", "deleted"]);
+const articleStatusSchema = z.enum([
+  "draft",
+  "published",
+  "archived",
+  "deleted",
+]);
 
-const sourceTypeSchema = z.enum(["internal", "external", "user_submitted", "ai_generated"]);
+const sourceTypeSchema = z.enum([
+  "internal",
+  "external",
+  "user_submitted",
+  "ai_generated",
+]);
 
 const sourceSchema = z.object({
   type: sourceTypeSchema,
@@ -28,16 +38,22 @@ const articleSchema = z.object({
   summary: z.string(),
   language: z.string(),
   status: articleStatusSchema,
-  created_at: z.string(),
-  updated_at: z.string(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
   published_at: z.string().nullable(),
   media_objects_placements: z.array(mediaObjectsPlacementSchema).default([]),
-  translation_of_id: z.string().nullable(),
   custom_fields: z.record(customFieldSchema).default({}),
+  translation_of_id: z.string().nullable(),
   file_urls: z.record(z.string()).nullable().optional(),
 });
 
-export { unixTimestampSchema, articleStatusSchema, sourceTypeSchema, sourceSchema, articleSchema };
+export {
+  unixTimestampSchema,
+  articleStatusSchema,
+  sourceTypeSchema,
+  sourceSchema,
+  articleSchema,
+};
 
 // Type inference
 export type IArticle = z.infer<typeof articleSchema>;
