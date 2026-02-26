@@ -11,6 +11,7 @@ const pageSchema = z.object({
   menu_label: z.string().nullable(),
   parent_id: z.string().nullable(),
   language: z.string(),
+  tags: z.array(z.string()).default([]),
   status: pageStatusSchema,
   created_at: z.string(),
   updated_at: z.string(),
