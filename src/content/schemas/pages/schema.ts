@@ -22,7 +22,15 @@ const pageSchema = z.object({
   file_urls: z.record(z.string()).nullable().optional(),
 });
 
-export { pageStatusSchema, pageSchema };
+const pagePreviewSchema = pageSchema.omit({
+  content: true,
+  media_objects_placements: true,
+  custom_fields: true,
+  file_urls: true,
+});
+
+export { pageStatusSchema, pageSchema, pagePreviewSchema };
 
 // Type inference
 export type IPage = z.infer<typeof pageSchema>;
+export type IPagePreview = z.infer<typeof pagePreviewSchema>;

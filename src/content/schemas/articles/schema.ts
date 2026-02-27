@@ -47,6 +47,13 @@ const articleSchema = z.object({
   file_urls: z.record(z.string()).nullable().optional(),
 });
 
+const articlePreviewSchema = articleSchema.omit({
+  content: true,
+  media_objects_placements: true,
+  custom_fields: true,
+  file_urls: true,
+});
+
 export {
   unixTimestampSchema,
   articleStatusSchema,
@@ -57,4 +64,5 @@ export {
 
 // Type inference
 export type IArticle = z.infer<typeof articleSchema>;
+export type IArticlePreview = z.infer<typeof articlePreviewSchema>;
 export type IArticleStatus = z.infer<typeof articleStatusSchema>;

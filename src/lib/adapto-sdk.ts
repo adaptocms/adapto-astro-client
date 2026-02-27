@@ -1,3 +1,33 @@
+// --- Preview Schemas ---
+export interface IArticlePreview {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any;
+}
+
+export interface ICustomCollectionItemPreview {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any;
+}
+
+export interface IPagePreview {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any;
+}
 import { API_URL, API_KEY } from "../../settings.ts";
 import type { IArticle } from "../content/schemas/articles";
 import type { ICategory } from "../content/schemas/categories";
@@ -214,6 +244,12 @@ export class AdaptoSDK {
       return this.processArticle(article);
     },
 
+    preview: async (params?: IBaseQueryParams) => {
+      return this.request<IPaginatedResponse<IArticlePreview>>(
+        "/public/articles/preview",
+        params,
+      );
+    },
     /**
      * Loops through all pages to get every article.
      * Great for Astro SSG.
@@ -297,6 +333,16 @@ export class AdaptoSDK {
       return response;
     },
 
+    previewItems: async (
+      collectionId: string,
+      params?: ICustomCollectionItemQueryParams,
+    ) => {
+      return this.request<IPaginatedResponse<ICustomCollectionItemPreview>>(
+        `/public/custom-collections/${collectionId}/items/preview`,
+        params,
+      );
+    },
+
     getItem: async (collectionId: string, itemId: string) => {
       const item = await this.request<ICustomCollectionItem>(
         `/public/custom-collections/${collectionId}/items/${itemId}`,
@@ -349,6 +395,12 @@ export class AdaptoSDK {
       return this.transformFileUrls(page);
     },
 
+    preview: async (params?: IBaseQueryParams) => {
+      return this.request<IPaginatedResponse<IPagePreview>>(
+        "/public/pages/preview",
+        params,
+      );
+    },
     listAll: (params?: Omit<IPageQueryParams, "page" | "limit">) =>
       this.fetchAllPages((p) => this.pages.list(p), params),
   };

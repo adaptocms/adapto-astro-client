@@ -58,6 +58,12 @@ const customCollectionItemSchema = z.object({
   file_urls: z.record(z.string()).nullable().optional(),
 });
 
+const customCollectionItemPreviewSchema = customCollectionItemSchema.omit({
+  data: true,
+  media_objects_placements: true,
+  file_urls: true,
+});
+
 export {
   customCollectionStatusSchema,
   customCollectionItemSchema,
@@ -68,4 +74,7 @@ export {
 // Type inference
 export type ICustomCollection = z.infer<typeof customCollectionSchema>;
 export type ICustomCollectionItem = z.infer<typeof customCollectionItemSchema>;
+export type ICustomCollectionItemPreview = z.infer<
+  typeof customCollectionItemPreviewSchema
+>;
 export type IField = z.infer<typeof fieldSchema>;
