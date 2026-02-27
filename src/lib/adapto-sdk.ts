@@ -1,40 +1,11 @@
-// --- Preview Schemas ---
-export interface IArticlePreview {
-  id: string;
-  title: string;
-  slug: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  [key: string]: any;
-}
-
-export interface ICustomCollectionItemPreview {
-  id: string;
-  title: string;
-  slug: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  [key: string]: any;
-}
-
-export interface IPagePreview {
-  id: string;
-  title: string;
-  slug: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  [key: string]: any;
-}
 import { API_URL, API_KEY } from "../../settings.ts";
-import type { IArticle } from "../content/schemas/articles";
+import type { IArticle, IArticlePreview } from "../content/schemas/articles";
 import type { ICategory } from "../content/schemas/categories";
-import type { IPage } from "../content/schemas/pages";
+import type { IPage, IPagePreview } from "../content/schemas/pages";
 import type {
   ICustomCollection,
   ICustomCollectionItem,
+  ICustomCollectionItemPreview,
 } from "../content/schemas/customCollections";
 import type { IMicroCopy } from "../content/schemas/microCopies";
 
@@ -107,12 +78,12 @@ export class AdaptoSDK {
     });
 
     if (this.cache.has(url.toString())) {
-      console.log(`Cache hit for: ${url.toString()}`);
+      console.log(`Cache HIT for: ${url.toString()}`);
       return this.cache.get(url.toString());
     }
 
     try {
-      console.log(`Cache miss for: ${url.toString()} (Attempt ${attempt})`);
+      console.log(`Cache MISS for: ${url.toString()} (Attempt ${attempt})`);
       const response = await fetch(url.toString(), {
         method: "GET",
         headers: {
@@ -156,16 +127,66 @@ export class AdaptoSDK {
     fetcher: (params: any) => Promise<IPaginatedResponse<T>>,
     baseParams: any = {},
   ): Promise<T[]> {
-    let allItems: T[] = [];
+    const allItems: T[] = [];
     let page = 1;
-    const limit = 100; // Maximize batch size for fewer requests
+    console.log(
+      `Starting fetchAllPages with baseParams: ${JSON.stringify(baseParams)}`,
+    );
 
-    while (true) {
-      const response = await fetcher({ ...baseParams, page, limit });
-      allItems = [...allItems, ...response.items];
+    const limit =
+      typeof baseParams.limit === "number" && baseParams.limit > 0
+        ? baseParams.limit
+        : 100;
 
-      if (page >= response.pages) break;
-      page++;
+    const MAX_PAGES_SAFEGUARD = 1000;
+
+    let totalExpected: number | null = null;
+
+    try {
+      while (page <= MAX_PAGES_SAFEGUARD) {
+        const response = await fetcher({ ...baseParams, page, limit });
+
+        if (!response || !Array.isArray(response.items)) {
+          break;
+        }
+
+        if (response.items.length === 0) {
+          break;
+        }
+
+        allItems.push(...response.items);
+
+        // Capture total on first response if present
+        if (totalExpected === null && typeof response.total === "number") {
+          totalExpected = response.total;
+        }
+
+        // Stop if we've already collected everything
+        if (totalExpected !== null && allItems.length >= totalExpected) {
+          break;
+        }
+
+        // Validate pages defensively
+        const totalPages =
+          typeof response.pages === "number" && response.pages > 0
+            ? response.pages
+            : null;
+
+        if (totalPages !== null && page >= totalPages) {
+          break;
+        }
+
+        page++;
+      }
+
+      if (page >= MAX_PAGES_SAFEGUARD) {
+        console.warn(
+          `fetchAllPages reached the MAX_PAGES_SAFEGUARD of ${MAX_PAGES_SAFEGUARD}.`,
+        );
+      }
+    } catch (error) {
+      console.error(`Fatal error in fetchAllPages at page ${page}:`, error);
+      throw error;
     }
 
     return allItems;
