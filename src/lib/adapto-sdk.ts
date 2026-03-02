@@ -129,9 +129,6 @@ export class AdaptoSDK {
   ): Promise<T[]> {
     const allItems: T[] = [];
     let page = 1;
-    console.log(
-      `Starting fetchAllPages with baseParams: ${JSON.stringify(baseParams)}`,
-    );
 
     const limit =
       typeof baseParams.limit === "number" && baseParams.limit > 0
