@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { customFieldSchema, mediaObjectsPlacementSchema } from "../shared";
 
 const unixTimestampSchema = z.number();
 
@@ -25,25 +26,6 @@ const sourceSchema = z.object({
   license: z.string().nullable(),
 });
 
-const mediaObject = z.object({
-  id: z.string().uuid(),
-  title: z.string(),
-  description: z.string(),
-  file_id: z.string(),
-  url: z.string().url(),
-  type: z.enum(["image", "video", "audio"]),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
-
-const mediaObjectsPlacementSchema = z.object({
-  placement_key: z.string(),
-  media_object: mediaObject,
-  caption: z.string().optional().or(z.literal("")),
-  alt_text: z.string().optional().or(z.literal("")),
-  meta_data: z.any(),
-});
-
 const articleSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -53,14 +35,23 @@ const articleSchema = z.object({
   source: sourceSchema,
   categories: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
-  summary: z.string().nullable(),
+  summary: z.string(),
   language: z.string(),
   status: articleStatusSchema,
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
   published_at: z.string().nullable(),
   media_objects_placements: z.array(mediaObjectsPlacementSchema).default([]),
+  custom_fields: z.record(customFieldSchema).default({}),
   translation_of_id: z.string().nullable(),
+  file_urls: z.record(z.string()).nullable().optional(),
+});
+
+const articlePreviewSchema = articleSchema.omit({
+  content: true,
+  media_objects_placements: true,
+  custom_fields: true,
+  file_urls: true,
 });
 
 export {
@@ -68,14 +59,10 @@ export {
   articleStatusSchema,
   sourceTypeSchema,
   sourceSchema,
-  mediaObject,
-  mediaObjectsPlacementSchema,
   articleSchema,
 };
 
 // Type inference
 export type IArticle = z.infer<typeof articleSchema>;
-export type IMediaObject = z.infer<typeof mediaObject>;
-export type IMediaObjectsPlacement = z.infer<
-  typeof mediaObjectsPlacementSchema
->;
+export type IArticlePreview = z.infer<typeof articlePreviewSchema>;
+export type IArticleStatus = z.infer<typeof articleStatusSchema>;

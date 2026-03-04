@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { customFieldSchema } from "../shared";
 
 const microCopySchema = z.object({
   id: z.string(),
@@ -9,6 +10,8 @@ const microCopySchema = z.object({
   tags: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
+  custom_fields: z.record(customFieldSchema).default({}),
+  file_urls: z.record(z.string()).nullable().optional(),
 });
 
 export { microCopySchema };

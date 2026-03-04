@@ -1,6 +1,6 @@
-import { DEFAULT_LANGUAGE } from "../content.config";
-import type { ICustomCollectionItem } from "../schemas/customCollections";
-import type { ILanguageLink } from "../schemas/languages";
+import { DEFAULT_LANGUAGE } from "../../settings.ts";
+import type { ICustomCollectionItem } from "../content/schemas/customCollections";
+import type { ILanguageLink } from "../content/schemas/languages";
 
 /**
  * Build available language links for a collection
@@ -8,7 +8,7 @@ import type { ILanguageLink } from "../schemas/languages";
  */
 export function buildCollectionTranslationLinksFromItems(
   items: { data: ICustomCollectionItem }[],
-  collectionSlug: string
+  collectionSlug: string,
 ): ILanguageLink[] {
   const langs = new Set<string>();
 

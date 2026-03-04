@@ -1,4 +1,4 @@
-import type { ILanguage } from "../schemas/languages";
+import type { ILanguage } from "../content/schemas/languages";
 
 export type ITranslationGroup<T> = {
   default: T; // the default language entity
@@ -10,7 +10,7 @@ export type ITranslationGroup<T> = {
  * Works for articles, categories, pages.
  */
 export function buildTranslationMap<
-  T extends { id: string; language: string; translation_of_id?: string | null }
+  T extends { id: string; language: string; translation_of_id?: string | null },
 >(items: T[], languages: ILanguage[]): Record<string, ITranslationGroup<T>> {
   const defaultLang =
     languages.find((l) => l.is_default)?.short || languages[0].short;
