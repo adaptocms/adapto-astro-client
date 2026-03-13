@@ -50,6 +50,21 @@ export interface IPageQueryParams extends IBaseQueryParams {
 
 // --- The SDK Class ---
 
+export interface ISearchResult {
+  entity_type: "article" | "page" | "collection_item";
+  id: string;
+  title: string;
+  slug: string;
+  parent_id?: string | null;
+  parent_name?: string | null;
+}
+
+export interface ISearchParams {
+  keyword: string;
+  scope?: string[];
+  limit?: number;
+}
+
 export class AdaptoSDK {
   private baseUrl: string;
   private apiKey: string;
@@ -72,7 +87,12 @@ export class AdaptoSDK {
     const url = new URL(`${this.baseUrl}${endpoint}`);
 
     Object.keys(params).forEach((key) => {
-      if (params[key] !== undefined && params[key] !== null) {
+      if (params[key] === undefined || params[key] === null) return;
+      if (Array.isArray(params[key])) {
+        params[key].forEach((v: string) =>
+          url.searchParams.append(key, String(v)),
+        );
+      } else {
         url.searchParams.append(key, String(params[key]));
       }
     });
@@ -458,10 +478,20 @@ export class AdaptoSDK {
       );
     },
   };
+
+  // ==========================================
+  // SEARCH
+  // ==========================================
+  public search = (params: ISearchParams): Promise<ISearchResult[]> =>
+    this.request<ISearchResult[]>("/public/search", {
+      keyword: params.keyword,
+      limit: params.limit ?? 20,
+      ...(params.scope ? { scope: params.scope } : {}),
+    });
+
   // ==========================================
   // LANGUAGES
   // ==========================================
-
   public languages = {
     /**
      * Fetch available languages. Requires the Tenant ID.
