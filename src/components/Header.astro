@@ -1,6 +1,7 @@
 ---
 import Navigation from "./Navigation.astro";
 import LanguageSwitch from "./LanguageSwitch.astro";
+import SearchForm from "./SearchForm.astro";
 import { getDefaultLanguage } from "../utils/languages.ts";
 import { DEFAULT_LANGUAGE } from "../../settings.ts";
 
@@ -19,7 +20,7 @@ const activeLang = hasLangPrefix
     style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 1rem 2rem; box-sizing: border-box;"
   >
     <Navigation langPrefix={hasLangPrefix ? activeLang : undefined} />
-
+    <SearchForm placeholder="Search..." action="/search" />
     <LanguageSwitch currentLang={currentLang} links={links} />
   </nav>
 </header>

@@ -1,0 +1,130 @@
+---
+interface Props {
+  collectionSlugMap?: Record<string, string>; // collection id → slug
+}
+
+const { collectionSlugMap = {} } = Astro.props;
+---
+
+<div
+  id="search-results"
+  data-collection-slug-map={JSON.stringify(collectionSlugMap)}
+>
+  <p id="sr-no-query">Enter a search term to see results.</p>
+  <p id="sr-loading" style="display:none;">Searching…</p>
+  <p id="sr-error" style="display:none;">
+    Something went wrong. Please try again.
+  </p>
+  <p id="sr-no-results" style="display:none;">No results found.</p>
+  <ul id="sr-list" style="display:none;"></ul>
+</div>
+
+<script>
+  import { adapto } from "../lib/adapto-sdk";
+  import type { ISearchResult } from "../lib/adapto-sdk";
+
+  const container = document.getElementById("search-results") as HTMLElement;
+  if (!container) throw new Error("[SearchResults] container not found");
+
+  const collectionSlugMap: Record<string, string> = JSON.parse(
+    container.dataset.collectionSlugMap || "{}",
+  );
+
+  const els = {
+    noQuery: document.getElementById("sr-no-query") as HTMLElement,
+    loading: document.getElementById("sr-loading") as HTMLElement,
+    error: document.getElementById("sr-error") as HTMLElement,
+    noResults: document.getElementById("sr-no-results") as HTMLElement,
+    list: document.getElementById("sr-list") as HTMLElement,
+  };
+
+  function showOnly(el: HTMLElement) {
+    Object.values(els).forEach((e) => (e.style.display = "none"));
+    el.style.display = "block";
+  }
+
+  function esc(s: string) {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function buildUrl(result: ISearchResult): string {
+    switch (result.entity_type) {
+      case "article":
+        return `/articles/${result.slug}`;
+      case "collection_item":
+        if (result.parent_id) {
+          const collSlug = collectionSlugMap[result.parent_id] ?? "";
+          return `/${collSlug}/${result.slug}`;
+        }
+        return "#";
+      case "page":
+        return `/${result.slug}`;
+      default:
+        return "#";
+    }
+  }
+
+  async function performSearch(query: string) {
+    showOnly(els.loading);
+    try {
+      const results = await adapto.search({ keyword: query, limit: 20 });
+
+      if (!results.length) {
+        showOnly(els.noResults);
+        return;
+      }
+
+      els.list.innerHTML = results
+        .map(
+          (r) =>
+            `<li class="sr-item"><a href="${esc(buildUrl(r))}">${esc(r.title)}</a></li>`,
+        )
+        .join("");
+      showOnly(els.list);
+    } catch {
+      showOnly(els.error);
+    }
+  }
+
+  const query = new URLSearchParams(window.location.search).get("query");
+  if (query) {
+    performSearch(query);
+  } else {
+    showOnly(els.noQuery);
+  }
+</script>
+
+<style>
+  #search-results {
+    margin-top: 1.5rem;
+  }
+
+  #sr-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sr-item {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .sr-item:last-child {
+    border-bottom: none;
+  }
+
+  .sr-item a {
+    color: #333;
+    text-decoration: none;
+    font-size: 1rem;
+  }
+
+  .sr-item a:hover {
+    text-decoration: underline;
+  }
+</style>

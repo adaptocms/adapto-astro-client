@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import SearchForm from "../../components/SearchForm.astro";
+import SearchResults from "../../components/SearchResults.astro";
+import { DEFAULT_LANGUAGE } from "../../../settings.ts";
+
+export async function getStaticPaths() {
+  return [{ params: { lang: undefined } }];
+}
+
+const allCollections = await getCollection("customCollections");
+
+const collectionSlugMap: Record<string, string> = {};
+for (const col of allCollections) {
+  collectionSlugMap[col.data.id] = col.data.slug;
+}
+---
+
+<Layout
+  metaTitle="Search"
+  metaDescription="Search our collections"
+  currentLang={DEFAULT_LANGUAGE}
+>
+  <main class="search-page">
+    <h1>Search</h1>
+    <SearchForm placeholder="Search..." action="/search" />
+    <SearchResults collectionSlugMap={collectionSlugMap} />
+  </main>
+</Layout>
+
+<style>
+  .search-page {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+</style>

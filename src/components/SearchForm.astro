@@ -1,0 +1,117 @@
+---
+interface Props {
+  placeholder?: string;
+  action?: string;
+}
+
+const { placeholder = "Search...", action = "/search" } = Astro.props;
+---
+
+<form class="search-form" method="GET" action={action} novalidate>
+  <div class="search-form__row">
+    <input
+      type="search"
+      name="query"
+      placeholder={placeholder}
+      autocomplete="off"
+      class="search-form__input"
+      aria-label={placeholder}
+    />
+    <button type="submit" class="search-form__btn">Search</button>
+  </div>
+  <p class="search-form__error" role="alert" aria-live="polite" style="display:none;"></p>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>(".search-form").forEach((form) => {
+    const input = form.querySelector<HTMLInputElement>("input[name='query']");
+    const errorEl = form.querySelector<HTMLElement>(".search-form__error");
+    if (!input || !errorEl) return;
+
+    function validate(val: string): string | null {
+      const trimmed = val.trim();
+      if (!trimmed) return "Please enter a search term.";
+      if (trimmed.length > 100) return "Search term must be under 100 characters.";
+      if (!/^[a-zA-Z0-9\s\-_.,!?'"]+$/.test(trimmed))
+        return "Search term contains invalid characters.";
+      return null;
+    }
+
+    function showError(msg: string) {
+      errorEl!.textContent = msg;
+      errorEl!.style.display = "block";
+    }
+
+    function clearError() {
+      errorEl!.textContent = "";
+      errorEl!.style.display = "none";
+    }
+
+    input.addEventListener("input", () => {
+      if (input.value.trim()) {
+        const err = validate(input.value);
+        err ? showError(err) : clearError();
+      } else {
+        clearError();
+      }
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const err = validate(input.value);
+      if (err) {
+        showError(err);
+        input.focus();
+        return;
+      }
+      clearError();
+      const formAction = form.getAttribute("action") || "/search";
+      const url = new URL(formAction, window.location.origin);
+      url.searchParams.set("query", input.value.trim());
+      window.location.href = url.toString();
+    });
+  });
+</script>
+
+<style>
+  .search-form__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .search-form__input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    min-width: 0;
+  }
+
+  .search-form__input:focus {
+    outline: 2px solid #333;
+    outline-offset: 1px;
+  }
+
+  .search-form__btn {
+    padding: 0.5rem 1rem;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .search-form__btn:hover {
+    background: #555;
+  }
+
+  .search-form__error {
+    color: #c53030;
+    font-size: 0.875rem;
+    margin-top: 0.35rem;
+  }
+</style>
