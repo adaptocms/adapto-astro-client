@@ -1,13 +1,43 @@
 ---
+import { SEO } from "astro-seo";
 import Footer from "../components/Footer.astro";
+import GoogleAnalytics from "../components/GoogleAnalytics.astro";
 import Header from "../components/Header.astro";
 import { DEFAULT_LANGUAGE } from "../../settings.ts";
 import type { ILanguageLink } from "../content/schemas/languages";
 
+type OgData = {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: "website" | "article" | "book" | "profile";
+};
+
+type TwitterData = {
+  card?: "summary" | "summary_large_image" | "app" | "player";
+  site?: string;
+  creator?: string;
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+};
+
+type JsonLdData = {
+  type: string;
+  [key: string]: unknown;
+};
+
 type IProps = {
-  pageTitle: string;
+  pageTitle?: string;
+  metaTitle: string;
+  metaDescription: string;
   currentLang: string;
   links?: ILanguageLink[];
+  ogData?: OgData;
+  twitterData?: TwitterData;
+  jsonLd?: JsonLdData;
 };
 
 // 1. Get the current path from Astro.url
@@ -24,7 +54,27 @@ const canonicalPath = isDefaultPrefix
 // 3. Construct the full URL (Ensure trailing slash consistency)
 const canonicalURL = new URL(canonicalPath, Astro.site);
 
-const { pageTitle, currentLang, links } = Astro.props as IProps;
+const {
+  pageTitle,
+  metaTitle,
+  metaDescription,
+  currentLang,
+  links,
+  ogData,
+  twitterData,
+  jsonLd,
+} = Astro.props as IProps;
+
+const jsonLdScript = jsonLd
+  ? JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": jsonLd.type,
+      ...jsonLd,
+      type: undefined,
+    })
+  : null;
+
+const shouldIncludeGA = false; // Set to true to include Google Analytics script
 ---
 
 <!doctype html>
@@ -34,8 +84,32 @@ const { pageTitle, currentLang, links } = Astro.props as IProps;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>{pageTitle}</title>
-    <link rel="canonical" href={canonicalURL.href} />
+    <SEO
+      title={metaTitle}
+      description={metaDescription}
+      canonical={canonicalURL.href}
+      openGraph={ogData && {
+        basic: {
+          title: ogData.title ?? metaTitle,
+          type: ogData.type ?? "website",
+          image: ogData.image ?? "",
+          url: canonicalURL.href,
+        },
+        ...(ogData.description || metaDescription
+          ? { optional: { description: ogData.description ?? metaDescription } }
+          : {}),
+        ...(ogData.imageAlt ? { image: { alt: ogData.imageAlt } } : {}),
+      }}
+      twitter={twitterData && {
+        card: twitterData.card ?? "summary_large_image",
+        site: twitterData.site,
+        creator: twitterData.creator,
+        title: twitterData.title ?? metaTitle,
+        description: twitterData.description ?? metaDescription,
+        image: twitterData.image,
+        imageAlt: twitterData.imageAlt,
+      }}
+    />
     {
       links?.map((link) => (
         <link
@@ -45,6 +119,12 @@ const { pageTitle, currentLang, links } = Astro.props as IProps;
         />
       ))
     }
+    {
+      jsonLdScript && (
+        <script type="application/ld+json" set:html={jsonLdScript} />
+      )
+    }
+    {shouldIncludeGA && <GoogleAnalytics />}
   </head>
   <body>
     <Header currentLang={currentLang} links={links} />

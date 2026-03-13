@@ -100,7 +100,12 @@ const { item, collection, langCode, translationLinks } = Astro.props;
 const urlBase = langCode ? `/${langCode}/showcase` : `/showcase`;
 ---
 
-<Layout links={translationLinks} currentLang={langCode}>
+<Layout
+  metaTitle={item.title}
+  metaDescription={`${item.title} - ${collection.name} showcase`}
+  links={translationLinks}
+  currentLang={langCode}
+>
   <article class="container mx-auto px-4 py-12 max-w-3xl space-y-6">
     <header class="border-b pb-4 mb-6">
       <h1 class="text-4xl font-bold">{item.title}</h1>

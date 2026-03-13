@@ -86,7 +86,13 @@ const { page, category, lang, translationLinks } = Astro.props;
 const pageTitle = `Category: ${category.name} (${lang.toUpperCase()})`;
 ---
 
-<Layout pageTitle={pageTitle} currentLang={lang} links={translationLinks}>
+<Layout
+  pageTitle={pageTitle}
+  metaTitle={pageTitle}
+  metaDescription={`Browse articles in the ${category.name} category`}
+  currentLang={lang}
+  links={translationLinks}
+>
   <header class="mb-8">
     <h1 class="text-3xl font-bold">{category.name}</h1>
     {

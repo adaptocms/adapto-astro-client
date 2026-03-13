@@ -117,7 +117,12 @@ const getFieldType = (fieldName: string) => {
 };
 ---
 
-<Layout links={translationLinks} currentLang={langCode}>
+<Layout
+  metaTitle={item.title}
+  metaDescription={`${item.title} - ${collection.name}`}
+  links={translationLinks}
+  currentLang={langCode}
+>
   <article class="container mx-auto px-4 py-12 max-w-4xl">
     <header class="border-b pb-8 mb-8">
       <h1 class="text-5xl font-black tracking-tight">{item.title}</h1>

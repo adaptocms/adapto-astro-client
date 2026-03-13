@@ -85,6 +85,8 @@ const renderedContent = hydrateMediaPlacements(
 
 <Layout
   pageTitle={article.title}
+  metaTitle={article.title}
+  metaDescription={`Article by ${article.author}`}
   links={translationLinks}
   currentLang={currentLang}
 >

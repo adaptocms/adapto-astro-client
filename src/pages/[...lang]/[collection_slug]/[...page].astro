@@ -90,6 +90,8 @@ const urlBase = lang ? `/${lang}/${collection.slug}` : `/${collection.slug}`;
 
 <Layout
   pageTitle={collection.name}
+  metaTitle={collection.name}
+  metaDescription={`Browse ${collection.name}`}
   currentLang={lang || DEFAULT_LANGUAGE}
   links={translationLinks}
 >

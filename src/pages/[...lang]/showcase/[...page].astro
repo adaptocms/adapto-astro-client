@@ -89,6 +89,8 @@ const urlBase = lang ? `/${lang}/showcase` : `/showcase`;
 
 <Layout
   pageTitle={collection.name}
+  metaTitle={collection.name}
+  metaDescription={`Browse ${collection.name}`}
   currentLang={lang || DEFAULT_LANGUAGE}
   links={translationLinks}
 >
