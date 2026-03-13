@@ -1,13 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
-import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../content.config";
-import type { ILanguageLink } from "../../../schemas/languages";
+import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../../settings.ts";
+import { buildTranslationMap } from "../../../utils/translationMap";
+import type { ILanguageLink } from "../../../content/schemas/languages";
 import type {
   ICustomCollection,
   ICustomCollectionItem,
-} from "../../../schemas/customCollections";
-import { buildTranslationMap } from "../../../utils/translationMap";
+} from "../../../content/schemas/customCollections";
 
 interface ICollectionItemPath {
   params: {
@@ -33,11 +33,11 @@ export async function getStaticPaths() {
 
   // Only include collections NOT in CUSTOM_COLLECTIONS (e.g., skip showcase)
   const filteredCollections = allCollections.filter(
-    (c) => !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
+    (c) => !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug),
   );
 
   const filteredItems = allItems.filter((item) =>
-    filteredCollections.some((c) => c.data.id === item.data.collection_id)
+    filteredCollections.some((c) => c.data.id === item.data.collection_id),
   );
 
   // 1. Convert Astro entries to raw data for the utility
@@ -61,7 +61,7 @@ export async function getStaticPaths() {
 
       // 3. Find the parent collection for the slug
       const parentCol = allCollections.find(
-        (c) => c.data.id === item.collection_id
+        (c) => c.data.id === item.collection_id,
       );
       if (!parentCol) return;
 
@@ -208,34 +208,3 @@ const getFieldType = (fieldName: string) => {
     </div>
   </article>
 </Layout>
-<!-- <Layout pageTitle={pageTitle} links={translationLinks} currentLang={langCode}>
-  <h1>{item.title}</h1> -->
-
-<!-- <div
-    set:html={data/}
-    style={{ fontStyle: "italic", fontSize: "0.9em" }}
-  /> -->
-
-<!-- <article class="container mx-auto px-4 py-8 max-w-4xl">
-    <nav class="mb-8 text-sm text-gray-500">
-      <a href="/" class="hover:underline">Home</a> /
-      <a href={`/${collection.slug}`} class="hover:underline"
-        >{collection.name}</a
-      > /
-      <span class="text-black">{item.title}</span>
-    </nav>
-
-    <h1 class="text-5xl font-extrabold mb-6">{item.title}</h1>
-
-    <div class="prose lg:prose-xl">
-      {
-        Object.entries(item.data.data).map(([key, value]) => (
-          <div class="mb-4">
-            <strong class="uppercase text-xs text-gray-400">{key}:</strong>
-            <p>{value}</p>
-          </div>
-        ))
-      }
-    </div>
-  </article> -->
-<!-- </Layout> -->

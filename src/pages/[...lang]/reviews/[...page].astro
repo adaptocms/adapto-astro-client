@@ -7,7 +7,7 @@ import {
   CUSTOM_COLLECTIONS,
   DEFAULT_LANGUAGE,
   PAGE_SIZE,
-} from "../../../content.config";
+} from "../../../../settings.ts";
 import { buildCollectionTranslationLinksFromItems } from "../../../utils/translationLinks";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
@@ -17,20 +17,20 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const validCollections = collections.filter(
     (c) =>
       c.data.slug !== "articles" &&
-      !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug)
+      !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug),
   );
 
   const allPaths = validCollections.flatMap((collectionEntry) => {
     const collection = collectionEntry.data;
 
     const collectionItems = allItems.filter(
-      (item) => item.data.collection_id === collection.id
+      (item) => item.data.collection_id === collection.id,
     );
 
     const translationLinks = collectionItems.length
       ? buildCollectionTranslationLinksFromItems(
           collectionItems,
-          collection.slug
+          collection.slug,
         )
       : [{ lang: DEFAULT_LANGUAGE, url: `/${collection.slug}` }];
 
@@ -38,7 +38,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
       const isDefault = lang === DEFAULT_LANGUAGE;
 
       const itemsForLang = collectionItems.filter(
-        (item) => item.data.language.split("-")[0] === lang
+        (item) => item.data.language.split("-")[0] === lang,
       );
 
       return paginate(itemsForLang, {

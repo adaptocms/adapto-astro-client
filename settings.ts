@@ -5,6 +5,7 @@ export const TENANT_ID = API_KEY?.split(".")[1] || "";
 
 export const DEFAULT_LANGUAGE = "en";
 export const ARTICLES_PER_PAGE = 2;
+export const PAGE_SIZE = 10;
 export const CUSTOM_COLLECTIONS: { id: string; name: string; slug: string }[] =
   [
     {
