@@ -1,20 +1,10 @@
-import { adapto } from "../../lib/adapto-sdk";
-import type { IPage } from "../schemas/pages";
+import { adapto } from '../../lib/adapto';
 
 export async function pagesLoader() {
-  try {
-    //  Fetches ALL pages automatically (handling pagination 1, 2, 3...)
-    // You can also pass filters here: .listAll({ status: 'published' })
-    const allPages = await adapto.pages.listAll();
+    const pages = await adapto.pages.listAll();
 
-    return allPages.map((page: IPage) => ({
-      ...page,
-      // Recommendation: Use the slug as the Astro Collection ID
-      // This makes looking up pages by URL much easier: getEntry('pages', 'about-us')
-      id: page.slug,
+    return pages.map((page) => ({
+        ...page,
+        id: page.slug,
     }));
-  } catch (error) {
-    console.error("⚠️ Pages loader failed:", error);
-    return [];
-  }
 }

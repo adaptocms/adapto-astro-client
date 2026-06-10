@@ -5,10 +5,10 @@ import {
   getDefaultLanguage,
   getPageStaticPaths,
 } from "../../utils/languages.ts";
-import { hydrateMediaPlacements } from "../../utils/hydrateMediaPlacements";
+import { hydrateMediaPlacements } from "adapto-client-sdk";
 import { DEFAULT_LANGUAGE } from "../../../settings.ts";
-import type { ILanguageLink } from "../../content/schemas/languages/index.ts";
-import type { IPage } from "../../content/schemas/pages/index.ts";
+import type { LanguageLink } from "../../types/languages";
+import type { Page } from "adapto-client-sdk";
 
 const defaultLanguage = await getDefaultLanguage();
 
@@ -18,10 +18,10 @@ export async function getStaticPaths() {
 
 const { lang, translations } = Astro.props as {
   lang: string;
-  translations: Record<string, IPage>;
+  translations: Record<string, Page>;
 };
 
-const translationLinks: ILanguageLink[] = Object.keys(translations).map(
+const translationLinks: LanguageLink[] = Object.keys(translations).map(
   (lang) => ({
     lang,
     href: `/${lang}/about`,

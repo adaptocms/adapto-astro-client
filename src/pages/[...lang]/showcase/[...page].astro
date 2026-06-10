@@ -4,7 +4,7 @@ import type { GetStaticPathsOptions } from "astro";
 import Layout from "../../../layouts/Layout.astro";
 import Pagination from "../../../components/Pagination.astro";
 import {
-  CUSTOM_COLLECTIONS,
+  BESPOKE_COLLECTION_SLUGS,
   DEFAULT_LANGUAGE,
   ARTICLES_PER_PAGE,
 } from "../../../../settings.ts";
@@ -14,9 +14,9 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const allItems = await getCollection("customCollectionItems");
   const collections = await getCollection("customCollections");
 
-  // Only include the "showcase" custom collection(s)
+  // Only the collections this directory hand-renders (registry: settings.ts)
   const showcaseCollections = collections.filter((c) =>
-    CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug),
+    BESPOKE_COLLECTION_SLUGS.includes(c.data.slug),
   );
 
   const allPaths = showcaseCollections.flatMap((collectionEntry) => {

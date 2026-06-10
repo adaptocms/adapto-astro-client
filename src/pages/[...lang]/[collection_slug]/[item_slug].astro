@@ -2,24 +2,27 @@
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
 import { buildTranslationMap } from "../../../utils/translationMap";
-import { DEFAULT_LANGUAGE, CUSTOM_COLLECTIONS } from "../../../../settings.ts";
-import type { ILanguageLink } from "../../../content/schemas/languages";
+import {
+  DEFAULT_LANGUAGE,
+  BESPOKE_COLLECTION_SLUGS,
+} from "../../../../settings.ts";
+import type { LanguageLink } from "../../../types/languages";
 import type {
-  ICustomCollection,
-  ICustomCollectionItem,
-} from "../../../content/schemas/customCollections";
+  CustomCollection,
+  CustomCollectionItem,
+} from "adapto-client-sdk";
 
-interface ICollectionItemPath {
+interface CollectionItemPath {
   params: {
     lang: string | undefined;
     collection_slug: string;
     item_slug: string;
   };
   props: {
-    item: ICustomCollectionItem;
-    collection: ICustomCollection;
+    item: CustomCollectionItem;
+    collection: CustomCollection;
     langCode: string | undefined;
-    translationLinks: ILanguageLink[];
+    translationLinks: LanguageLink[];
   };
 }
 
@@ -31,9 +34,9 @@ export async function getStaticPaths() {
   const defaultLang =
     languages.find((l) => l.is_default)?.short || DEFAULT_LANGUAGE;
 
-  // Only include collections NOT in CUSTOM_COLLECTIONS (e.g., skip showcase)
+  // Skip collections that have hand-built pages (e.g. showcase)
   const filteredCollections = allCollections.filter(
-    (c) => !CUSTOM_COLLECTIONS.some((cc) => cc.slug === c.data.slug),
+    (c) => !BESPOKE_COLLECTION_SLUGS.includes(c.data.slug),
   );
 
   const filteredItems = allItems.filter((item) =>
@@ -46,7 +49,7 @@ export async function getStaticPaths() {
   // 2. Build the map (this handles the translation_of_id logic)
   const translationMap = buildTranslationMap(itemsData, languages);
 
-  const paths: ICollectionItemPath[] = [];
+  const paths: CollectionItemPath[] = [];
 
   for (const groupId in translationMap) {
     const group = translationMap[groupId];
@@ -66,7 +69,7 @@ export async function getStaticPaths() {
       if (!parentCol) return;
 
       // 4. Build links for THIS specific item's translations
-      const translationLinks: ILanguageLink[] = allTranslations.map((tr) => {
+      const translationLinks: LanguageLink[] = allTranslations.map((tr) => {
         const trLang = tr.language.split("-")[0];
         return {
           lang: trLang,
@@ -117,7 +120,7 @@ const getFieldType = (fieldName: string) => {
 };
 ---
 
-<Layout links={translationLinks} currentLang={langCode}>
+<Layout pageTitle={item.title} links={translationLinks} currentLang={langCode}>
   <article class="container mx-auto px-4 py-12 max-w-4xl">
     <header class="border-b pb-8 mb-8">
       <h1 class="text-5xl font-black tracking-tight">{item.title}</h1>
@@ -208,34 +211,3 @@ const getFieldType = (fieldName: string) => {
     </div>
   </article>
 </Layout>
-<!-- <Layout pageTitle={pageTitle} links={translationLinks} currentLang={langCode}>
-  <h1>{item.title}</h1> -->
-
-<!-- <div
-    set:html={data/}
-    style={{ fontStyle: "italic", fontSize: "0.9em" }}
-  /> -->
-
-<!-- <article class="container mx-auto px-4 py-8 max-w-4xl">
-    <nav class="mb-8 text-sm text-gray-500">
-      <a href="/" class="hover:underline">Home</a> /
-      <a href={`/${collection.slug}`} class="hover:underline"
-        >{collection.name}</a
-      > /
-      <span class="text-black">{item.title}</span>
-    </nav>
-
-    <h1 class="text-5xl font-extrabold mb-6">{item.title}</h1>
-
-    <div class="prose lg:prose-xl">
-      {
-        Object.entries(item.data.data).map(([key, value]) => (
-          <div class="mb-4">
-            <strong class="uppercase text-xs text-gray-400">{key}:</strong>
-            <p>{value}</p>
-          </div>
-        ))
-      }
-    </div>
-  </article> -->
-<!-- </Layout> -->

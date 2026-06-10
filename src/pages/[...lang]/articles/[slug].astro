@@ -2,27 +2,27 @@
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
 import { buildTranslationMap } from "../../../utils/translationMap";
-import { hydrateMediaPlacements } from "../../../utils/hydrateMediaPlacements";
+import { hydrateMediaPlacements } from "adapto-client-sdk";
 import { DEFAULT_LANGUAGE } from "../../../../settings.ts";
-import type { IArticle } from "../../../content/schemas/articles";
-import type { ILanguageLink } from "../../../content/schemas/languages";
+import type { Article } from "adapto-client-sdk";
+import type { LanguageLink } from "../../../types/languages";
 
-interface IArticlePath {
+interface ArticlePath {
   params: { slug: string; lang?: string };
   props: {
-    article: IArticle;
-    translationLinks: ILanguageLink[];
+    article: Article;
+    translationLinks: LanguageLink[];
   };
 }
 
-export async function getStaticPaths(): Promise<IArticlePath[]> {
+export async function getStaticPaths(): Promise<ArticlePath[]> {
   const articles = (await getCollection("articles")).map((a) => a.data);
   const languages = (await getCollection("languages")).map((l) => l.data);
   const defaultLang = languages.find((l) => l.is_default)?.short || "en";
 
   const translationMap = buildTranslationMap(articles, languages);
 
-  const paths: IArticlePath[] = [];
+  const paths: ArticlePath[] = [];
 
   for (const groupId in translationMap) {
     const group = translationMap[groupId];
@@ -33,7 +33,7 @@ export async function getStaticPaths(): Promise<IArticlePath[]> {
     ];
 
     // Build translation links
-    const translationLinks: ILanguageLink[] = languages
+    const translationLinks: LanguageLink[] = languages
       .map((lang) => {
         const langCode = lang.short;
         const translated = allTranslations.find(
@@ -48,7 +48,7 @@ export async function getStaticPaths(): Promise<IArticlePath[]> {
               : `/${langCode}/articles/${translated.slug}`,
         };
       })
-      .filter(Boolean) as ILanguageLink[];
+      .filter(Boolean) as LanguageLink[];
 
     allTranslations.forEach((article) => {
       const langCode = article.language.split("-")[0];

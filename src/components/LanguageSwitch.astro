@@ -1,13 +1,13 @@
 ---
 import { getCollection } from "astro:content";
-import type { ILanguageLink } from "../content/schemas/languages";
+import type { LanguageLink } from "../types/languages";
 
-interface IProps {
+interface Props {
   currentLang: string;
-  links: ILanguageLink[];
+  links: LanguageLink[];
 }
 const availableLanguages = await getCollection("languages");
-const { currentLang, links } = Astro.props as IProps;
+const { currentLang, links } = Astro.props as Props;
 ---
 
 {

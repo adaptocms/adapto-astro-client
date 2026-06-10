@@ -2,12 +2,12 @@
 import { getCollection } from "astro:content";
 import { getDefaultLanguage, getFullLanguageCode } from "../utils/languages.ts";
 
-type IProps = {
+type Props = {
   key: string;
   lang?: string; // optional short language code
 };
 
-const { key, lang } = Astro.props as IProps;
+const { key, lang } = Astro.props as Props;
 
 const microCopies = await getCollection("microCopies");
 const defaultLanguage = await getDefaultLanguage();

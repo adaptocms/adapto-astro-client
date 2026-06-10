@@ -7,7 +7,7 @@ import {
   DEFAULT_LANGUAGE,
   ARTICLES_PER_PAGE,
 } from "../../../../../../settings.ts";
-import type { ILanguageLink } from "../../../../../content/schemas/languages";
+import type { LanguageLink } from "../../../../../types/languages";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const articles = await getCollection("articles");
@@ -27,7 +27,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
           category.id === groupId || category.translation_of_id === groupId,
       );
 
-    const translationLinks: ILanguageLink[] = categoryGroup.map((c) => {
+    const translationLinks: LanguageLink[] = categoryGroup.map((c) => {
       const lang = c.language.split("-")[0];
       return {
         lang,

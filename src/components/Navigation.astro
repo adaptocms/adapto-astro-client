@@ -1,11 +1,11 @@
 ---
 import { getCollection } from "astro:content";
 
-interface IProps {
+interface Props {
   langPrefix?: string;
 }
 
-const { langPrefix } = Astro.props as IProps;
+const { langPrefix } = Astro.props as Props;
 
 const customCollections = await getCollection("customCollections");
 

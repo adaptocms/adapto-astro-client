@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@astrojs/sitemap": "^3.6.1",
+        "adapto-client-sdk": "^0.1.0",
         "astro": "^5.16.4"
     }
 }

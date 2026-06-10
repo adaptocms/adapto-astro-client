@@ -2,12 +2,12 @@
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import { DEFAULT_LANGUAGE } from "../../settings.ts";
-import type { ILanguageLink } from "../content/schemas/languages";
+import type { LanguageLink } from "../types/languages";
 
-type IProps = {
+type Props = {
   pageTitle: string;
-  currentLang: string;
-  links?: ILanguageLink[];
+  currentLang?: string;
+  links?: LanguageLink[];
 };
 
 // 1. Get the current path from Astro.url
@@ -24,7 +24,7 @@ const canonicalPath = isDefaultPrefix
 // 3. Construct the full URL (Ensure trailing slash consistency)
 const canonicalURL = new URL(canonicalPath, Astro.site);
 
-const { pageTitle, currentLang, links } = Astro.props as IProps;
+const { pageTitle, currentLang, links } = Astro.props as Props;
 ---
 
 <!doctype html>
