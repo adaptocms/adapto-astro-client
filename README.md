@@ -99,6 +99,21 @@ reserved system collection with their own predefined directory and logic.
 
 ---
 
+## ✅ Verifying changes
+
+This template ships no test framework — changes are verified by exercising the
+real behaviour before they're considered done:
+
+1. `npm run build` succeeds — **including with blank `ADAPTO_API_URL`/`ADAPTO_API_KEY`**
+   (a fresh, unconfigured project must build and render onboarding, not crash).
+2. `npm run dev` boots **with** a valid key (the site renders).
+3. `npm run dev` boots **without** a key (an onboarding page renders — no crash).
+4. No dead links in nav/footer against an empty tenant.
+5. Visual review of the changed surface (for styling: visible focus, sufficient
+   contrast, semantic landmarks).
+
+---
+
 ## 🌍 Localization & Paths
 
 The project supports an optional default language.
