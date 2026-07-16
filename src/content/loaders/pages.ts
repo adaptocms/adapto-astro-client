@@ -1,10 +1,12 @@
-import { adapto } from '../../lib/adapto';
+import { adapto, guardedLoad } from '../../lib/adapto';
 
 export async function pagesLoader() {
-    const pages = await adapto.pages.listAll();
+    return guardedLoad(async () => {
+        const pages = await adapto.pages.listAll();
 
-    return pages.map((page) => ({
-        ...page,
-        id: page.slug,
-    }));
+        return pages.map((page) => ({
+            ...page,
+            id: page.slug,
+        }));
+    });
 }

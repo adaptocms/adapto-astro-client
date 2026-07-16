@@ -1,5 +1,5 @@
-import { adapto } from '../../lib/adapto';
+import { adapto, guardedLoad } from '../../lib/adapto';
 
 export async function customCollectionsLoader() {
-    return adapto.customCollections.listAll();
+    return guardedLoad(() => adapto.customCollections.listAll());
 }

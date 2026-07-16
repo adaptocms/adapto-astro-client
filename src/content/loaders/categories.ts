@@ -1,5 +1,5 @@
-import { adapto } from '../../lib/adapto';
+import { adapto, guardedLoad } from '../../lib/adapto';
 
 export async function categoriesLoader() {
-    return adapto.categories.listAll();
+    return guardedLoad(() => adapto.categories.listAll());
 }
