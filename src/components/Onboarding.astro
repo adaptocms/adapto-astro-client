@@ -1,18 +1,31 @@
 ---
-// First-run onboarding surface. Self-contained — takes its state from the caller
-// (derived from the config guard + content counts) and makes no network calls of
-// its own. Shown on the home page whenever there is no CMS "home" page to render.
+import { adminUrl, withRef } from "../lib/admin";
+
+// First-run onboarding surface. Presentational — counts and config state come from the
+// caller (derived from the config guard + already-synced content collections); it makes
+// no network calls of its own. Shown on the home page when there is no CMS "home" page.
 interface Props {
   state: "not-connected" | "empty" | "live";
+  counts?: {
+    collections: number;
+    pages: number;
+    articles: number;
+    categories: number;
+    microcopies: number;
+  };
   signupUrl?: string;
   docsUrl?: string;
 }
 
 const {
   state,
+  counts,
   signupUrl = "https://app.adaptocms.com/auth/register",
   docsUrl = "https://adaptocms.com/docs/astro-starter/#content-collections-architecture",
 } = Astro.props as Props;
+
+const CLI_URL = "https://github.com/adaptocms/adapto-cms-cli";
+const SKILLS_URL = "https://github.com/adaptocms/adapto-cms-agent-skills";
 
 const label = {
   "not-connected": "Not connected to Adapto CMS",
@@ -20,8 +33,18 @@ const label = {
   live: "Connected",
 }[state];
 
-// The freshness note only matters while the developer is adding content.
-const showFreshness = state !== "live";
+const connected = state !== "not-connected";
+const openAdminUrl = adminUrl("", "astro-starter-admin");
+
+const stats = counts
+  ? [
+      { label: "Collections", count: counts.collections, section: "collections" },
+      { label: "Pages", count: counts.pages, section: "pages" },
+      { label: "Articles", count: counts.articles, section: "articles" },
+      { label: "Categories", count: counts.categories, section: "categories" },
+      { label: "Micro-copies", count: counts.microcopies, section: "micro-copies" },
+    ]
+  : [];
 ---
 
 <section class="onboarding stack">
@@ -38,7 +61,11 @@ const showFreshness = state !== "live";
         <ol class="stack">
           <li>
             Get a free API key from{" "}
-            <a href={signupUrl} target="_blank" rel="noopener noreferrer">
+            <a
+              href={withRef(signupUrl, "astro-starter-onboarding")}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Adapto CMS
             </a>
             .
@@ -49,56 +76,95 @@ const showFreshness = state !== "live";
           </li>
           <li>Restart the dev server.</li>
         </ol>
+        <p class="muted onboarding-note">
+          New CMS content appears after you restart the dev server (or rebuild) —
+          this is a static Astro site.
+        </p>
       </>
     )
   }
 
   {
-    state === "empty" && (
+    connected && (
       <>
-        <h2>Create your first content</h2>
+        <h2>{state === "empty" ? "Add your first content" : "You're live"}</h2>
         <p>
-          Your tenant is connected but empty. Add content through the Admin, the
-          CLI, or the Adapto CMS agent skills.
-        </p>
-        <p>
-          <a href={docsUrl} target="_blank" rel="noopener noreferrer">
+          {state === "empty"
+            ? "Your project is connected. Create content in the admin, from the CLI, or with an AI agent — then rebuild to see it here."
+            : "Your project is pulling content from Adapto CMS. Manage it below, or create a home Page to customize this screen."}{" "}
+          <a
+            href={withRef(docsUrl, "astro-starter-onboarding")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Read the docs →
           </a>
         </p>
-      </>
-    )
-  }
 
-  {
-    state === "live" && (
-      <>
-        <h2>You're live</h2>
-        <p>
-          Your project is pulling content from Adapto CMS. To customize this
-          home page, create a <code>home</code> Page in your tenant.
-        </p>
-      </>
-    )
-  }
+        <div class="dashboard">
+          <div class="card stack">
+            <div>
+              <h3>Adapto CMS Admin</h3>
+              <p>Create and manage content in the browser.</p>
+              {openAdminUrl && (
+                <p>
+                  <a href={openAdminUrl} target="_blank" rel="noopener noreferrer">
+                    Open the admin →
+                  </a>
+                </p>
+              )}
+            </div>
+            <div>
+              <h3>Adapto CLI</h3>
+              <p>
+                Manage content from your terminal or CI.{" "}
+                <a href={CLI_URL} target="_blank" rel="noopener noreferrer">
+                  adapto-cms-cli →
+                </a>
+              </p>
+            </div>
+            <div>
+              <h3>Adapto CMS agent skills</h3>
+              <p>
+                Let an AI agent research, plan, write and publish for you.{" "}
+                <a href={SKILLS_URL} target="_blank" rel="noopener noreferrer">
+                  adapto-cms-agent-skills →
+                </a>
+              </p>
+            </div>
+          </div>
 
-  {
-    showFreshness && (
-      <p class="muted onboarding-note">
-        New CMS content appears after you restart the dev server (or rebuild) —
-        this is a static Astro site.
-      </p>
+          <div class="card">
+            <h3>Your content</h3>
+            <ul class="stats-list">
+              {stats.map((s) => {
+                const add = adminUrl(s.section, "astro-starter-stats");
+                return (
+                  <li>
+                    <span class="stat-count">{s.count}</span>
+                    <span class="stat-label">{s.label}</span>
+                    {add && (
+                      <a
+                        class="stat-add"
+                        href={add}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Add new
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      </>
     )
   }
 </section>
 
 <style>
-  .onboarding {
-    max-width: 42rem;
-    padding: var(--space-5);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
   .onboarding-status {
     margin: 0;
     font-size: var(--text-sm);
@@ -111,8 +177,57 @@ const showFreshness = state !== "live";
   }
   .onboarding-note {
     margin: 0;
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--border);
+    font-size: var(--text-sm);
+  }
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 48rem) {
+    .dashboard {
+      grid-template-columns: 1.3fr 1fr;
+      align-items: start;
+    }
+  }
+  .card {
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .card h3 {
+    margin-bottom: var(--space-1);
+    font-size: var(--text-base);
+  }
+  .card p {
+    margin: 0;
+    color: var(--muted);
+  }
+  .stats-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .stats-list li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stats-list li:last-child {
+    border-bottom: none;
+  }
+  .stat-count {
+    min-width: 1.5rem;
+    font-weight: 700;
+    text-align: right;
+  }
+  .stat-label {
+    flex: 1;
+    color: var(--ink);
+  }
+  .stat-add {
     font-size: var(--text-sm);
   }
 </style>

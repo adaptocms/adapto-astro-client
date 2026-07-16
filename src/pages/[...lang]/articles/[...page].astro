@@ -4,6 +4,7 @@ import type { GetStaticPathsOptions } from "astro";
 import Layout from "../../../layouts/Layout.astro";
 import Pagination from "../../../components/Pagination.astro";
 import { DEFAULT_LANGUAGE, ARTICLES_PER_PAGE } from "../../../../settings.ts";
+import { adminUrl } from "../../../lib/admin";
 import type { LanguageLink } from "../../../types/languages";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
@@ -45,6 +46,9 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
 const { page, categories, lang, translationLinks } = Astro.props;
 
+const addArticleUrl = adminUrl("articles", "astro-starter-articles");
+const addCategoryUrl = adminUrl("categories", "astro-starter-articles");
+
 const isDefault = lang === DEFAULT_LANGUAGE;
 const articleHref = (slug: string) =>
   isDefault ? `/articles/${slug}` : `/${lang}/articles/${slug}`;
@@ -59,7 +63,17 @@ const categoryHref = (slug: string) =>
     <div>
       {
         page.data.length === 0 ? (
-          <p class="muted">No articles have been published yet.</p>
+          <p class="muted">
+            No articles have been published yet.
+            {addArticleUrl && (
+              <>
+                {" "}
+                <a href={addArticleUrl} target="_blank" rel="noopener noreferrer">
+                  Add new →
+                </a>
+              </>
+            )}
+          </p>
         ) : (
           <ul class="list">
             {page.data.map((entry) => (
@@ -81,7 +95,17 @@ const categoryHref = (slug: string) =>
       <h2>Categories</h2>
       {
         categories.length === 0 ? (
-          <p class="muted">No categories yet.</p>
+          <p class="muted">
+            No categories yet.
+            {addCategoryUrl && (
+              <>
+                {" "}
+                <a href={addCategoryUrl} target="_blank" rel="noopener noreferrer">
+                  Add new →
+                </a>
+              </>
+            )}
+          </p>
         ) : (
           <ul class="list">
             {categories.map((entry) => (
