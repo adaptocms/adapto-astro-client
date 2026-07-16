@@ -104,41 +104,23 @@ const urlBase = langCode ? `/${langCode}/showcase` : `/showcase`;
 ---
 
 <Layout pageTitle={item.title} links={translationLinks} currentLang={langCode}>
-  <article class="container mx-auto px-4 py-12 max-w-3xl space-y-6">
-    <header class="border-b pb-4 mb-6">
-      <h1 class="text-4xl font-bold">{item.title}</h1>
-      {
-        item.data.client_sector && (
-          <p class="text-gray-500 italic mt-1">
-            Sector: {item.data.client_sector}
-          </p>
-        )
-      }
-    </header>
-
-    <div style="color: red;">
-      This is our custom collection showcase item page that is not dynamically
-      generated.
-    </div>
-
+  <article class="stack">
     {
-      item.data.image && (
-        <img
-          src={item.data.image}
-          alt={item.title}
-          class="rounded-lg shadow-md w-full max-h-[400px] object-cover"
-        />
+      item.data.client_sector && (
+        <p class="muted">Sector: {item.data.client_sector}</p>
       )
     }
+
+    {item.data.image && <img src={item.data.image} alt={item.title} />}
 
     {
       item.data.content && (
-        <div class="prose prose-blue" set:html={item.data.content} />
+        <div class="prose" set:html={item.data.content} />
       )
     }
 
-    <a href={urlBase} class="inline-block mt-6 text-blue-600 hover:underline">
-      &larr; Back to Showcase
-    </a>
+    <p>
+      <a href={urlBase}>&larr; Back to Showcase</a>
+    </p>
   </article>
 </Layout>

@@ -92,17 +92,11 @@ const urlBase = lang ? `/${lang}/showcase` : `/showcase`;
   currentLang={lang || DEFAULT_LANGUAGE}
   links={translationLinks}
 >
-  <div style="color: red;">
-    This is our custom collection showcase page that is not dynamically
-    generated.
-  </div>
   {
     page.data.length === 0 ? (
-      <div class="text-gray-500 italic">
-        There are no items in this collection.
-      </div>
+      <p class="muted">There are no items in this collection.</p>
     ) : (
-      <ul class="space-y-4">
+      <ul class="list">
         {page.data.map((item) => (
           <li>
             <a href={`${urlBase}/${item.data.slug}`}>{item.data.title}</a>
@@ -112,7 +106,5 @@ const urlBase = lang ? `/${lang}/showcase` : `/showcase`;
     )
   }
 
-  <div class="mt-12">
-    <Pagination page={page} basePath={`${lang || DEFAULT_LANGUAGE}/showcase`} />
-  </div>
+  <Pagination page={page} basePath={`${lang || DEFAULT_LANGUAGE}/showcase`} />
 </Layout>

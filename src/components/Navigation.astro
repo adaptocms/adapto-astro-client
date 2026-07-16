@@ -21,18 +21,12 @@ customCollections.forEach((collection) => {
 });
 ---
 
-<div style="display: flex; gap: 1rem;">
+<div class="nav-links">
   {
-    navItems.map((item) => {
-      return (
-        <a
-          href={langPrefix ? `/${langPrefix}${item.href}` : item.href}
-          style="margin-right: 1.5rem;"
-          class="hover:underline"
-        >
-          {item.label}
-        </a>
-      );
-    })
+    navItems.map((item) => (
+      <a href={langPrefix ? `/${langPrefix}${item.href}` : item.href}>
+        {item.label}
+      </a>
+    ))
   }
 </div>

@@ -79,13 +79,12 @@ const content = hydrateMediaPlacements(
 >
   {
     currentPage && (
-      <main>
-        <h3>
+      <>
+        <h2>
           <Microcopy key="adapto" lang={activeLangKey} />
-        </h3>
-
-        <div set:html={content} />
-      </main>
+        </h2>
+        <div class="prose" set:html={content} />
+      </>
     )
   }
 </Layout>

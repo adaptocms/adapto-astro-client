@@ -88,16 +88,11 @@ const renderedContent = hydrateMediaPlacements(
   links={translationLinks}
   currentLang={currentLang}
 >
-  <a
-    href={lang ? `/${lang}/articles/categories` : "/articles/categories"}
-    class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-  >
-    &larr; Go back to articles
-  </a>
-  <h1>{article.title}</h1>
-  <p><strong>Author:</strong> {article.author}</p>
-  <div
-    set:html={renderedContent}
-    style={{ fontStyle: "italic", fontSize: "0.9em" }}
-  />
+  <p>
+    <a href={lang ? `/${lang}/articles/categories` : "/articles/categories"}>
+      &larr; Go back to articles
+    </a>
+  </p>
+  <p class="muted"><strong>Author:</strong> {article.author}</p>
+  <div class="prose" set:html={renderedContent} />
 </Layout>

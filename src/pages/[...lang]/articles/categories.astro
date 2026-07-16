@@ -76,29 +76,27 @@ const pageTitle = `Categories (${currentLang.toUpperCase()})`;
   links={translationLinks}
   currentLang={currentLang}
 >
-  <section class="category-list">
-    {
-      categories.length === 0 ? (
-        <p>No categories have been defined yet. Check your CMS setup.</p>
-      ) : (
-        <ul>
-          {categories.map((category) => {
-            const langCode = category.language.split("-")[0];
-            const href =
-              langCode === DEFAULT_LANGUAGE
-                ? `/articles/category/${category.slug}`
-                : `/${langCode}/articles/category/${category.slug}`;
+  {
+    categories.length === 0 ? (
+      <p class="muted">No categories have been defined yet.</p>
+    ) : (
+      <ul class="card-grid">
+        {categories.map((category) => {
+          const langCode = category.language.split("-")[0];
+          const href =
+            langCode === DEFAULT_LANGUAGE
+              ? `/articles/category/${category.slug}`
+              : `/${langCode}/articles/category/${category.slug}`;
 
-            return (
-              <li>
-                <a href={href} class="category-card">
-                  {category.name}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      )
-    }
-  </section>
+          return (
+            <li>
+              <a href={href} class="card">
+                {category.name}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
 </Layout>

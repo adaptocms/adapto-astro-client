@@ -87,16 +87,13 @@ const pageTitle = `Category: ${category.name} (${lang.toUpperCase()})`;
 ---
 
 <Layout pageTitle={pageTitle} currentLang={lang} links={translationLinks}>
-  <header class="mb-8">
-    <h1 class="text-3xl font-bold">{category.name}</h1>
-    {
-      category.description && (
-        <div class="mt-2 text-gray-600" set:html={category.description} />
-      )
-    }
-  </header>
+  {
+    category.description && (
+      <div class="muted" set:html={category.description} />
+    )
+  }
 
-  <ul class="space-y-4">
+  <ul class="list">
     {
       page.data.map((article) => (
         <li>
@@ -106,7 +103,6 @@ const pageTitle = `Category: ${category.name} (${lang.toUpperCase()})`;
                 ? `/articles/${article.data.slug}`
                 : `/${lang}/articles/${article.data.slug}`
             }
-            class="text-xl text-blue-600 hover:underline"
           >
             {article.data.title}
           </a>
