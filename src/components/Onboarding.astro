@@ -1,9 +1,9 @@
 ---
-import { adminUrl, withRef } from "../lib/admin";
-
 // First-run onboarding surface. Presentational — counts and config state come from the
 // caller (derived from the config guard + already-synced content collections); it makes
-// no network calls of its own. Shown on the home page when there is no CMS "home" page.
+// no network calls of its own. Rendered on the home page when there is no CMS "home" page,
+// and only during `astro dev` (see the DEV gate in the home route): it links to the admin
+// and shows the project id + content stats, which must not ship to a public build.
 interface Props {
   state: "not-connected" | "empty" | "live";
   counts?: {
@@ -34,15 +34,17 @@ const label = {
 }[state];
 
 const connected = state !== "not-connected";
-const openAdminUrl = adminUrl("", "astro-starter-admin");
+
+// Generic admin entry point — the project list. No project id, safe to link anywhere.
+const ADMIN_URL = "https://app.adaptocms.com/projects";
 
 const stats = counts
   ? [
-      { label: "Collections", count: counts.collections, section: "collections" },
-      { label: "Pages", count: counts.pages, section: "pages" },
-      { label: "Articles", count: counts.articles, section: "articles" },
-      { label: "Categories", count: counts.categories, section: "categories" },
-      { label: "Micro-copies", count: counts.microcopies, section: "micro-copies" },
+      { label: "Collections", count: counts.collections },
+      { label: "Pages", count: counts.pages },
+      { label: "Articles", count: counts.articles },
+      { label: "Categories", count: counts.categories },
+      { label: "Micro-copies", count: counts.microcopies },
     ]
   : [];
 ---
@@ -58,11 +60,7 @@ const stats = counts
         <ol class="stack">
           <li>
             Get a free API key from{" "}
-            <a
-              href={withRef(signupUrl, "astro-starter-onboarding")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={signupUrl} target="_blank" rel="noopener noreferrer">
               Adapto CMS
             </a>
             .
@@ -89,11 +87,7 @@ const stats = counts
           {state === "empty"
             ? "Your project is connected. Create content in the admin, from the CLI, or with an AI agent."
             : "Your project is pulling content from Adapto CMS. Manage it below, or create a home Page to customize this screen."}{" "}
-          <a
-            href={withRef(docsUrl, "astro-starter-onboarding")}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={docsUrl} target="_blank" rel="noopener noreferrer">
             Read the docs →
           </a>
         </p>
@@ -103,13 +97,11 @@ const stats = counts
             <div>
               <h3>Adapto CMS Admin</h3>
               <p>Create and manage content in the browser.</p>
-              {openAdminUrl && (
-                <p>
-                  <a href={openAdminUrl} target="_blank" rel="noopener noreferrer">
-                    Open the admin →
-                  </a>
-                </p>
-              )}
+              <p>
+                <a href={ADMIN_URL} target="_blank" rel="noopener noreferrer">
+                  Open the admin →
+                </a>
+              </p>
             </div>
             <div>
               <h3>Adapto CLI</h3>
@@ -134,25 +126,12 @@ const stats = counts
           <div class="card">
             <h3>Your content</h3>
             <ul class="stats-list">
-              {stats.map((s) => {
-                const add = adminUrl(s.section, "astro-starter-stats");
-                return (
-                  <li>
-                    <span class="stat-count">{s.count}</span>
-                    <span class="stat-label">{s.label}</span>
-                    {add && (
-                      <a
-                        class="stat-add"
-                        href={add}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Add new
-                      </a>
-                    )}
-                  </li>
-                );
-              })}
+              {stats.map((s) => (
+                <li>
+                  <span class="stat-count">{s.count}</span>
+                  <span class="stat-label">{s.label}</span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -229,9 +208,6 @@ const stats = counts
   .stat-label {
     flex: 1;
     color: var(--ink);
-  }
-  .stat-add {
-    font-size: var(--text-sm);
   }
   .dashboard-note {
     margin: 0;
