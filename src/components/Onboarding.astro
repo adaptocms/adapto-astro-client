@@ -1,0 +1,112 @@
+---
+// First-run onboarding surface. Self-contained — takes its state from the caller
+// (derived from the config guard + content counts) and makes no network calls of
+// its own. Shown on the home page whenever there is no CMS "home" page to render.
+interface Props {
+  state: "not-connected" | "empty" | "live";
+  signupUrl?: string;
+  docsUrl?: string;
+}
+
+const {
+  state,
+  signupUrl = "https://app.adaptocms.com/auth/register",
+  docsUrl = "https://adaptocms.com/docs",
+} = Astro.props as Props;
+
+const label = {
+  "not-connected": "Not connected to Adapto CMS",
+  empty: "Connected — no content yet",
+  live: "Connected",
+}[state];
+
+// The freshness note only matters while the developer is adding content.
+const showFreshness = state !== "live";
+---
+
+<section class="onboarding stack">
+  <p class="onboarding-status">{label}</p>
+
+  {
+    state === "not-connected" && (
+      <>
+        <h2>Connect your project</h2>
+        <p>
+          Add an API key so this site can pull content from your Adapto CMS
+          tenant.
+        </p>
+        <ol class="stack">
+          <li>
+            Get a free API key from <a href={signupUrl}>Adapto CMS</a>.
+          </li>
+          <li>
+            Add it to <code>.env</code> as <code>ADAPTO_API_KEY</code> (with{" "}
+            <code>ADAPTO_API_URL</code>).
+          </li>
+          <li>Restart the dev server.</li>
+        </ol>
+      </>
+    )
+  }
+
+  {
+    state === "empty" && (
+      <>
+        <h2>Create your first content</h2>
+        <p>
+          Your tenant is connected but empty. Add content through the Admin, the
+          CLI, or the Adapto CMS agent skills.
+        </p>
+        <p>
+          <a href={docsUrl}>Read the docs →</a>
+        </p>
+      </>
+    )
+  }
+
+  {
+    state === "live" && (
+      <>
+        <h2>You're live</h2>
+        <p>
+          Your project is pulling content from Adapto CMS. To customize this
+          home page, create a <code>home</code> Page in your tenant.
+        </p>
+      </>
+    )
+  }
+
+  {
+    showFreshness && (
+      <p class="muted onboarding-note">
+        New CMS content appears after you restart the dev server (or rebuild) —
+        this is a static Astro site.
+      </p>
+    )
+  }
+</section>
+
+<style>
+  .onboarding {
+    max-width: 42rem;
+    padding: var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .onboarding-status {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .onboarding ol {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+  .onboarding-note {
+    margin: 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+    font-size: var(--text-sm);
+  }
+</style>

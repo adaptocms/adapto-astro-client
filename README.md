@@ -16,6 +16,13 @@ ADAPTO_API_KEY=your_api_key_here
 
 2. `npm install`, then `npm run dev`.
 
+> **Content freshness:** this is a static Astro site, so new CMS content shows up
+> only after you restart the dev server (or rebuild) — not on a page refresh. The
+> home page repeats this note on-screen until your tenant has content.
+
+If you start the dev server without a valid key, the site still boots and shows a
+first-run onboarding page instead of crashing.
+
 ## 📂 Project Structure
 
 ```text
