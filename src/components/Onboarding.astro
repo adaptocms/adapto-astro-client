@@ -29,7 +29,7 @@ const SKILLS_URL = "https://github.com/adaptocms/adapto-cms-agent-skills";
 
 const label = {
   "not-connected": "Not connected to Adapto CMS",
-  empty: "Connected — no content yet",
+  empty: "Connected, no content yet",
   live: "Connected",
 }[state];
 
@@ -54,10 +54,7 @@ const stats = counts
     state === "not-connected" && (
       <>
         <h2>Connect your project</h2>
-        <p>
-          Add an API key so this site can pull content from your Adapto CMS
-          tenant.
-        </p>
+        <p>Add an API key to pull content from your Adapto CMS tenant.</p>
         <ol class="stack">
           <li>
             Get a free API key from{" "}
@@ -77,8 +74,8 @@ const stats = counts
           <li>Restart the dev server.</li>
         </ol>
         <p class="muted onboarding-note">
-          New CMS content appears after you restart the dev server (or rebuild) —
-          this is a static Astro site.
+          This is a static Astro site, so new CMS content appears only after you
+          restart the dev server or rebuild.
         </p>
       </>
     )
@@ -90,7 +87,7 @@ const stats = counts
         <h2>{state === "empty" ? "Add your first content" : "You're live"}</h2>
         <p>
           {state === "empty"
-            ? "Your project is connected. Create content in the admin, from the CLI, or with an AI agent — then rebuild to see it here."
+            ? "Your project is connected. Create content in the admin, from the CLI, or with an AI agent."
             : "Your project is pulling content from Adapto CMS. Manage it below, or create a home Page to customize this screen."}{" "}
           <a
             href={withRef(docsUrl, "astro-starter-onboarding")}
@@ -161,9 +158,9 @@ const stats = counts
         </div>
 
         <p class="dashboard-note">
-          Heads up — this is a static Astro site. Anything you add or change in
-          Adapto CMS appears only after you restart the dev server (or rebuild);
-          a page refresh won't pick it up.
+          This is a static Astro site. Anything you add or change in Adapto CMS
+          shows up only after you restart the dev server or rebuild. A page
+          refresh won't pick it up.
         </p>
       </>
     )
