@@ -1,64 +1,36 @@
 ---
-import { hasLanguagePrefixInUrl } from "../utils/languages.ts";
-
-const hasLangPrefix = await hasLanguagePrefixInUrl(Astro.url.pathname);
-
-const navItems = [
-  { href: "/about/", label: "About" },
-  { href: "/contact/", label: "Contact" },
-];
 ---
 
 <footer class="footer">
   <div class="footer-content">
-    <p>&copy; {new Date().getFullYear()} Adapto CMS. All rights reserved.</p>
-
-    <div class="footer-links">
-      {
-        navItems.map((item) => {
-          return (
-            <a
-              href={
-                hasLangPrefix
-                  ? `/${Astro.url.pathname.split("/")[1]}${item.href}`
-                  : item.href
-              }
-            >
-              {item.label}
-            </a>
-          );
-        })
-      }
-    </div>
+    <p>
+      &copy; {new Date().getFullYear()}{" "}
+      <a href="https://adaptocms.com" target="_blank" rel="noopener noreferrer"
+        >Adapto CMS</a
+      >. All rights reserved.
+    </p>
   </div>
 </footer>
 
 <style>
   .footer {
     width: 100%;
-    color: black;
+    border-top: 1px solid var(--border);
   }
 
   .footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: nowrap;
-    padding: 1rem;
-    max-width: 1200px;
+    max-width: var(--max-width);
     margin: 0 auto;
+    padding: var(--space-3) var(--space-4);
+    text-align: center;
   }
 
-  .footer-links {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-  }
-
-  .footer-content p,
-  .footer-content a {
+  .footer-content p {
     margin: 0;
-    text-decoration: none;
+    color: var(--muted);
+  }
+
+  .footer-content a {
     color: inherit;
   }
 </style>

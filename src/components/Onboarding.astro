@@ -37,7 +37,11 @@ const showFreshness = state !== "live";
         </p>
         <ol class="stack">
           <li>
-            Get a free API key from <a href={signupUrl}>Adapto CMS</a>.
+            Get a free API key from{" "}
+            <a href={signupUrl} target="_blank" rel="noopener noreferrer">
+              Adapto CMS
+            </a>
+            .
           </li>
           <li>
             Add it to <code>.env</code> as <code>ADAPTO_API_KEY</code> (with{" "}
@@ -58,7 +62,9 @@ const showFreshness = state !== "live";
           CLI, or the Adapto CMS agent skills.
         </p>
         <p>
-          <a href={docsUrl}>Read the docs →</a>
+          <a href={docsUrl} target="_blank" rel="noopener noreferrer">
+            Read the docs →
+          </a>
         </p>
       </>
     )
