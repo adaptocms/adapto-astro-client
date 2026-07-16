@@ -1,0 +1,138 @@
+---
+import { getCollection } from "astro:content";
+import type { GetStaticPathsOptions } from "astro";
+import Layout from "../../../layouts/Layout.astro";
+import Pagination from "../../../components/Pagination.astro";
+import { DEFAULT_LANGUAGE, ARTICLES_PER_PAGE } from "../../../../settings.ts";
+import { adminUrl } from "../../../lib/admin";
+import type { LanguageLink } from "../../../types/languages";
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const articles = await getCollection("articles");
+  const categories = await getCollection("categories");
+  const languages = (await getCollection("languages")).map((l) => l.data);
+  const defaultLang =
+    languages.find((l) => l.is_default)?.short || DEFAULT_LANGUAGE;
+
+  return languages.flatMap((language) => {
+    const langShort = language.short;
+    const isDefault = langShort === defaultLang;
+
+    // Most recent first, so "page 1" is the latest articles.
+    const langArticles = articles
+      .filter((a) => a.data.language.split("-")[0] === langShort)
+      .sort((a, b) => {
+        const ad = a.data.published_at ?? a.data.created_at ?? "";
+        const bd = b.data.published_at ?? b.data.created_at ?? "";
+        return bd.localeCompare(ad);
+      });
+
+    const langCategories = categories.filter(
+      (c) => c.data.language.split("-")[0] === langShort,
+    );
+
+    const translationLinks: LanguageLink[] = languages.map((l) => ({
+      lang: l.short,
+      href: l.short === defaultLang ? "/articles" : `/${l.short}/articles`,
+    }));
+
+    return paginate(langArticles, {
+      pageSize: ARTICLES_PER_PAGE,
+      params: { lang: isDefault ? undefined : langShort },
+      props: { categories: langCategories, lang: langShort, translationLinks },
+    });
+  });
+}
+
+const { page, categories, lang, translationLinks } = Astro.props;
+
+const addArticleUrl = adminUrl("articles", "astro-starter-articles");
+const addCategoryUrl = adminUrl("categories", "astro-starter-articles");
+
+const isDefault = lang === DEFAULT_LANGUAGE;
+const articleHref = (slug: string) =>
+  isDefault ? `/articles/${slug}` : `/${lang}/articles/${slug}`;
+const categoryHref = (slug: string) =>
+  isDefault
+    ? `/articles/category/${slug}`
+    : `/${lang}/articles/category/${slug}`;
+---
+
+<Layout pageTitle="Articles" currentLang={lang} links={translationLinks}>
+  <div class="articles-layout">
+    <div>
+      {
+        page.data.length === 0 ? (
+          <p class="muted">
+            No articles yet.
+            {addArticleUrl && (
+              <>
+                {" "}
+                <a href={addArticleUrl} target="_blank" rel="noopener noreferrer">
+                  Add new →
+                </a>
+              </>
+            )}
+          </p>
+        ) : (
+          <ul class="list">
+            {page.data.map((entry) => (
+              <li>
+                <a href={articleHref(entry.data.slug)}>{entry.data.title}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      <Pagination
+        page={page}
+        basePath={isDefault ? "articles" : `${lang}/articles`}
+      />
+    </div>
+
+    <aside class="articles-sidebar">
+      <h2>Categories</h2>
+      {
+        categories.length === 0 ? (
+          <p class="muted">
+            No categories yet.
+            {addCategoryUrl && (
+              <>
+                {" "}
+                <a href={addCategoryUrl} target="_blank" rel="noopener noreferrer">
+                  Add new →
+                </a>
+              </>
+            )}
+          </p>
+        ) : (
+          <ul class="list">
+            {categories.map((entry) => (
+              <li>
+                <a href={categoryHref(entry.data.slug)}>{entry.data.name}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </aside>
+  </div>
+</Layout>
+
+<style>
+  .articles-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+  @media (min-width: 48rem) {
+    .articles-layout {
+      grid-template-columns: 1fr 15rem;
+    }
+  }
+  .articles-sidebar h2 {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-lg);
+  }
+</style>

@@ -14,10 +14,8 @@ const activeLang = hasLangPrefix
   : defaultLanguage?.short || DEFAULT_LANGUAGE;
 ---
 
-<header style="width: 100%; border-bottom: 1px solid #eee;">
-  <nav
-    style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 1rem 2rem; box-sizing: border-box;"
-  >
+<header class="site-header">
+  <nav>
     <Navigation langPrefix={hasLangPrefix ? activeLang : undefined} />
 
     <LanguageSwitch currentLang={currentLang} links={links} />

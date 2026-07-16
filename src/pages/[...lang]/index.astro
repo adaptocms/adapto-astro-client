@@ -2,6 +2,8 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Microcopy from "../../components/Microcopy.astro";
+import Onboarding from "../../components/Onboarding.astro";
+import { IS_CONFIGURED } from "../../lib/adapto";
 import {
   getDefaultLanguage,
   getPagesWithTranslations,
@@ -64,12 +66,47 @@ const translationLinks: LanguageLink[] = Object.keys(translations).map(
 
 const activeLangKey = lang || defaultLanguage?.short || DEFAULT_LANGUAGE;
 const currentPage = translations[activeLangKey];
-const pageTitle = currentPage ? currentPage.title : "Home Page";
+const pageTitle = currentPage ? currentPage.title : "Welcome to Adapto CMS";
 
 const content = hydrateMediaPlacements(
   currentPage ? currentPage.content : "",
   currentPage ? currentPage.media_objects_placements : [],
 );
+
+// Onboarding state for a home page with no CMS "home" content to render.
+const [
+  articleEntries,
+  pageEntries,
+  itemEntries,
+  categoryEntries,
+  collectionEntries,
+  microCopyEntries,
+] = await Promise.all([
+  getCollection("articles"),
+  getCollection("pages"),
+  getCollection("customCollectionItems"),
+  getCollection("categories"),
+  getCollection("customCollections"),
+  getCollection("microCopies"),
+]);
+const hasContent =
+  articleEntries.length + pageEntries.length + itemEntries.length > 0;
+
+// Counts for the stats card. Read from the already-synced content collections
+// (build-time, no extra network calls) rather than separate fetches.
+const counts = {
+  collections: collectionEntries.length,
+  pages: pageEntries.length,
+  articles: articleEntries.length,
+  categories: categoryEntries.length,
+  microcopies: microCopyEntries.length,
+};
+
+const onboardingState = !IS_CONFIGURED
+  ? "not-connected"
+  : hasContent
+    ? "live"
+    : "empty";
 ---
 
 <Layout
@@ -78,14 +115,15 @@ const content = hydrateMediaPlacements(
   currentLang={activeLangKey}
 >
   {
-    currentPage && (
-      <main>
-        <h3>
+    currentPage ? (
+      <>
+        <h2>
           <Microcopy key="adapto" lang={activeLangKey} />
-        </h3>
-
-        <div set:html={content} />
-      </main>
+        </h2>
+        <div class="prose" set:html={content} />
+      </>
+    ) : (
+      <Onboarding state={onboardingState} counts={counts} />
     )
   }
 </Layout>

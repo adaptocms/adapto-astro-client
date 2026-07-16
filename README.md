@@ -16,6 +16,13 @@ ADAPTO_API_KEY=your_api_key_here
 
 2. `npm install`, then `npm run dev`.
 
+> **Content freshness:** this is a static Astro site, so new CMS content shows up
+> only after you restart the dev server or rebuild, not on a page refresh. The
+> home page repeats this note on-screen until your tenant has content.
+
+If you start the dev server without a valid key, the site still boots and shows a
+first-run onboarding page instead of crashing.
+
 ## 📂 Project Structure
 
 ```text
@@ -96,6 +103,21 @@ reserved system collection with their own predefined directory and logic.
 | `npm run dev`     | Starts local development server at `http://localhost:4321`. |
 | `npm run build`   | Bundles the site into the `dist/` folder for production.    |
 | `npm run preview` | Locally previews the production build.                      |
+
+---
+
+## ✅ Verifying changes
+
+This template ships no test framework. Changes are verified by exercising the
+real behaviour before they're considered done:
+
+1. `npm run build` succeeds, **including with blank `ADAPTO_API_URL`/`ADAPTO_API_KEY`**
+   (a fresh, unconfigured project must build and render onboarding, not crash).
+2. `npm run dev` boots **with** a valid key (the site renders).
+3. `npm run dev` boots **without** a key (an onboarding page renders, no crash).
+4. No dead links in nav/footer against an empty tenant.
+5. Visual review of the changed surface (for styling: visible focus, sufficient
+   contrast, semantic landmarks).
 
 ---
 

@@ -3,6 +3,7 @@ import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import { DEFAULT_LANGUAGE } from "../../settings.ts";
 import type { LanguageLink } from "../types/languages";
+import "../styles/global.css";
 
 type Props = {
   pageTitle: string;
@@ -48,8 +49,10 @@ const { pageTitle, currentLang, links } = Astro.props as Props;
   </head>
   <body>
     <Header currentLang={currentLang} links={links} />
-    <h1>{pageTitle}</h1>
-    <slot />
+    <main class="container">
+      <h1>{pageTitle}</h1>
+      <slot />
+    </main>
     <Footer />
     <script>
       import "../scripts/menu.js";

@@ -95,11 +95,9 @@ const urlBase = lang ? `/${lang}/${collection.slug}` : `/${collection.slug}`;
 >
   {
     page.data.length === 0 ? (
-      <div class="text-gray-500 italic">
-        There are no items in this collection.
-      </div>
+      <p class="muted">There are no items in this collection.</p>
     ) : (
-      <ul class="space-y-4">
+      <ul class="list">
         {page.data.map((item) => (
           <li>
             <a href={`${urlBase}/${item.data.slug}`}>{item.data.title}</a>
@@ -109,10 +107,8 @@ const urlBase = lang ? `/${lang}/${collection.slug}` : `/${collection.slug}`;
     )
   }
 
-  <div class="mt-12">
-    <Pagination
-      page={page}
-      basePath={`${lang || DEFAULT_LANGUAGE}/${collection.slug}`}
-    />
-  </div>
+  <Pagination
+    page={page}
+    basePath={`${lang || DEFAULT_LANGUAGE}/${collection.slug}`}
+  />
 </Layout>

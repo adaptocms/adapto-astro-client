@@ -12,11 +12,8 @@ const { currentLang, links } = Astro.props as Props;
 
 {
   availableLanguages.length > 1 && (
-    <div style="display: flex; align-items: center;">
-      <select
-        id="language-switch"
-        style="padding: 4px 8px; border-radius: 4px;"
-      >
+    <div class="language-switch">
+      <select id="language-switch">
         {(links || []).map((link) => (
           <option value={link.href ?? ""} selected={link.lang === currentLang}>
             {link.lang.toUpperCase()}

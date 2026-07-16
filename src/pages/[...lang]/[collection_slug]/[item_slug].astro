@@ -121,88 +121,58 @@ const getFieldType = (fieldName: string) => {
 ---
 
 <Layout pageTitle={item.title} links={translationLinks} currentLang={langCode}>
-  <article class="container mx-auto px-4 py-12 max-w-4xl">
-    <header class="border-b pb-8 mb-8">
-      <h1 class="text-5xl font-black tracking-tight">{item.title}</h1>
-      <p class="text-gray-500 mt-2 italic">Collection: {collection.name}</p>
-    </header>
+  <article class="stack">
+    <p class="muted">Collection: {collection.name}</p>
 
-    <div class="mb-8">
-      <a
-        href={urlBase}
-        class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-      >
-        &larr; Go back to {collection.name}
-      </a>
-    </div>
+    <p>
+      <a href={urlBase}>&larr; Go back to {collection.name}</a>
+    </p>
 
-    <div class="space-y-10">
+    <div>
       {
         Object.entries(item.data || {}).map(([key, value]) => {
           const type = getFieldType(key);
 
           return (
             <div class="field-group">
-              <label class="block text-xs font-bold uppercase tracking-widest text-blue-600 mb-2">
-                {key.replace("_", " ")}
-              </label>
+              <div class="field-label">{key.replace("_", " ")}</div>
 
-              <div class="field-content">
-                {/* 1. Handle Images */}
+              <div>
+                {/* Images */}
                 {type === "image" &&
                   value &&
                   (typeof value === "string" ? (
-                    <img
-                      src={value}
-                      alt={key}
-                      class="rounded-lg shadow-md max-w-full h-auto"
-                    />
+                    <img src={value} alt={key} />
                   ) : (
-                    /* Handle case where image is an object { url: "..." } */
-                    (value as any).url && (
-                      <img
-                        src={(value as any).url}
-                        alt={key}
-                        class="rounded-lg shadow-md max-w-full h-auto"
-                      />
-                    )
+                    (value as any).url && <img src={(value as any).url} alt={key} />
                   ))}
 
-                {/* 2. Handle Rich Text / Textarea */}
+                {/* Rich text / textarea */}
                 {(type === "rich_text" || type === "textarea") && (
-                  <div class="prose prose-blue" set:html={value} />
+                  <div class="prose" set:html={value} />
                 )}
 
-                {/* 3. Handle Booleans */}
+                {/* Booleans */}
                 {type === "boolean" && (
-                  <span
-                    class={`px-3 py-1 rounded-full text-sm font-medium ${value ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                  >
-                    {value ? "Yes" : "No"}
-                  </span>
+                  <span class="badge">{value ? "Yes" : "No"}</span>
                 )}
 
-                {/* 4. Handle Colors */}
+                {/* Colors */}
                 {type === "color" && (
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-8 h-8 rounded border"
-                      style={{ backgroundColor: value }}
-                    />
-                    <code class="text-sm">{value}</code>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="swatch" style={{ backgroundColor: value }} />
+                    <code>{value}</code>
                   </div>
                 )}
 
-                {/* 5. Default Fallback (Text, Number, Email, URL) */}
+                {/* Default (text, number, email, url) */}
                 {![
                   "image",
                   "rich_text",
                   "textarea",
                   "boolean",
                   "color",
-                ].includes(type) && (
-                  <p class="text-lg text-gray-800">{value}</p>
-                )}
+                ].includes(type) && <p>{value}</p>}
               </div>
             </div>
           );
