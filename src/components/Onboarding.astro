@@ -159,6 +159,12 @@ const stats = counts
             </ul>
           </div>
         </div>
+
+        <p class="dashboard-note">
+          Heads up — this is a static Astro site. Anything you add or change in
+          Adapto CMS appears only after you restart the dev server (or rebuild);
+          a page refresh won't pick it up.
+        </p>
       </>
     )
   }
@@ -228,6 +234,14 @@ const stats = counts
     color: var(--ink);
   }
   .stat-add {
+    font-size: var(--text-sm);
+  }
+  .dashboard-note {
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border-left: 3px solid var(--ink);
+    border-radius: 4px;
     font-size: var(--text-sm);
   }
 </style>
