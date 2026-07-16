@@ -7,10 +7,15 @@ export const PROJECT_ID = API_KEY.split(".")[1] ?? "";
 const ADMIN_BASE = "https://app.adaptocms.com";
 
 // Deep link into this project's Adapto CMS admin (optionally a section), tagged with a
-// `ref` for PostHog attribution. Returns "" when there is no project id so callers can
-// gate the link (e.g. hide "Add new" when unconfigured).
+// `ref` for PostHog attribution. Returns "" so callers gate the link off (e.g. hide
+// "Add new") in two cases:
+//   1. No project id (unconfigured).
+//   2. Production build. Admin links carry the project id and point at the authenticated
+//      admin — a local-development aid, not something to ship to public visitors. They
+//      render only during `astro dev` (import.meta.env.DEV), so no project id lands in a
+//      built site. This is the single chokepoint for every admin link in the app.
 export function adminUrl(section = "", ref = "astro-starter"): string {
-  if (!PROJECT_ID) return "";
+  if (!import.meta.env.DEV || !PROJECT_ID) return "";
   const path = section ? `/${section}` : "";
   return `${ADMIN_BASE}/projects/project-${PROJECT_ID}${path}?ref=${ref}`;
 }

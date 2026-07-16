@@ -3,7 +3,9 @@ import { adminUrl, withRef } from "../lib/admin";
 
 // First-run onboarding surface. Presentational — counts and config state come from the
 // caller (derived from the config guard + already-synced content collections); it makes
-// no network calls of its own. Shown on the home page when there is no CMS "home" page.
+// no network calls of its own. Rendered on the home page when there is no CMS "home" page,
+// and only during `astro dev` (see the DEV gate in the home route): it links to the admin
+// and shows the project id + content stats, which must not ship to a public build.
 interface Props {
   state: "not-connected" | "empty" | "live";
   counts?: {

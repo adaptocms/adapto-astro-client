@@ -122,8 +122,16 @@ const onboardingState = !IS_CONFIGURED
         </h2>
         <div class="prose" set:html={content} />
       </>
-    ) : (
+    ) : import.meta.env.DEV ? (
+      // Onboarding is a local-development aid (it links to the admin and shows the
+      // project id + content stats). It renders only during `astro dev`; a built site
+      // never ships it, so those links never reach public visitors.
       <Onboarding state={onboardingState} counts={counts} />
+    ) : (
+      <section class="stack center">
+        <h1>Welcome</h1>
+        <p class="muted">This site doesn't have any content yet.</p>
+      </section>
     )
   }
 </Layout>
