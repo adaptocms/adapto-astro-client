@@ -1,5 +1,9 @@
 import { adapto, guardedLoad } from '../../lib/adapto';
+import { isReserved } from '../../lib/reserved';
 
 export async function customCollectionsLoader() {
-    return guardedLoad(() => adapto.customCollections.listAll());
+    return guardedLoad(async () => {
+        const collections = await adapto.customCollections.listAll();
+        return collections.filter((collection) => !isReserved(collection.slug));
+    });
 }

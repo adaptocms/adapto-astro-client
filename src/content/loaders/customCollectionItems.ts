@@ -1,8 +1,11 @@
 import { adapto, guardedLoad } from '../../lib/adapto';
+import { isReserved } from '../../lib/reserved';
 
 export async function customCollectionItemsLoader() {
     return guardedLoad(async () => {
-        const collections = await adapto.customCollections.listAll();
+        const collections = (await adapto.customCollections.listAll()).filter(
+            (collection) => !isReserved(collection.slug)
+        );
 
         const allItemsNested = await Promise.all(
             collections.map(async (collection) => {
