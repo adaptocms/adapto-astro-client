@@ -1,5 +1,7 @@
-import { adapto, guardedLoad } from '../../lib/adapto';
+import { adapto, guardedLoad, withDrafts } from '../../lib/adapto';
 
 export async function articlesLoader() {
-    return guardedLoad(() => adapto.articles.listAll({ status: 'published' }));
+    return guardedLoad(() =>
+        withDrafts((status) => adapto.articles.listAll({ status })),
+    );
 }

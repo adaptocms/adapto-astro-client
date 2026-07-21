@@ -1,4 +1,4 @@
-import { adapto, guardedLoad } from '../../lib/adapto';
+import { adapto, guardedLoad, withDrafts } from '../../lib/adapto';
 import { isReserved } from '../../lib/reserved';
 
 export async function customCollectionItemsLoader() {
@@ -9,7 +9,9 @@ export async function customCollectionItemsLoader() {
 
         const allItemsNested = await Promise.all(
             collections.map(async (collection) => {
-                const items = await adapto.customCollections.listAllItems(collection.id);
+                const items = await withDrafts((status) =>
+                    adapto.customCollections.listAllItems(collection.id, { status })
+                );
 
                 return items.map((item) => ({
                     ...item,

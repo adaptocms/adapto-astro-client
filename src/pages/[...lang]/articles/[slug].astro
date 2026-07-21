@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
+import DraftBadge from "../../../components/DraftBadge.astro";
 import { buildTranslationMap } from "../../../utils/translationMap";
 import { hydrateMediaPlacements } from "adapto-client-sdk";
 import { DEFAULT_LANGUAGE } from "../../../../settings.ts";
@@ -93,6 +94,9 @@ const renderedContent = hydrateMediaPlacements(
       &larr; Go back to articles
     </a>
   </p>
-  <p class="muted"><strong>Author:</strong> {article.author}</p>
+  <p class="muted">
+    <strong>Author:</strong> {article.author}
+    <DraftBadge status={article.status} />
+  </p>
   <div class="prose" set:html={renderedContent} />
 </Layout>

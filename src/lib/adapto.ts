@@ -31,3 +31,16 @@ export async function guardedLoad<T>(load: () => Promise<T[]>): Promise<T[]> {
         return [];
     }
 }
+
+// Fetch published content, and also drafts while running `astro dev` so you can
+// preview unpublished items locally. A production build gets published content
+// only — drafts never ship. Each item keeps its `status`, so the UI can flag the
+// drafts (see DraftBadge). Pass a fetcher that takes a status and returns items.
+export async function withDrafts<T>(
+    fetchByStatus: (status: 'published' | 'draft') => Promise<T[]>,
+): Promise<T[]> {
+    const published = await fetchByStatus('published');
+    if (!import.meta.env.DEV) return published;
+    const drafts = await fetchByStatus('draft');
+    return [...published, ...drafts];
+}

@@ -1,8 +1,8 @@
-import { adapto, guardedLoad } from '../../lib/adapto';
+import { adapto, guardedLoad, withDrafts } from '../../lib/adapto';
 
 export async function pagesLoader() {
     return guardedLoad(async () => {
-        const pages = await adapto.pages.listAll();
+        const pages = await withDrafts((status) => adapto.pages.listAll({ status }));
 
         return pages.map((page) => ({
             ...page,

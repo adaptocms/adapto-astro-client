@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import type { GetStaticPathsOptions } from "astro";
 import Layout from "../../../layouts/Layout.astro";
 import Pagination from "../../../components/Pagination.astro";
+import DraftBadge from "../../../components/DraftBadge.astro";
 import {
   BESPOKE_COLLECTION_SLUGS,
   DEFAULT_LANGUAGE,
@@ -101,6 +102,7 @@ const urlBase = lang ? `/${lang}/${collection.slug}` : `/${collection.slug}`;
         {page.data.map((item) => (
           <li>
             <a href={`${urlBase}/${item.data.slug}`}>{item.data.title}</a>
+            <DraftBadge status={item.data.status} />
           </li>
         ))}
       </ul>

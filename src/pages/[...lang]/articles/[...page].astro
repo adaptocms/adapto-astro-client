@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import type { GetStaticPathsOptions } from "astro";
 import Layout from "../../../layouts/Layout.astro";
 import Pagination from "../../../components/Pagination.astro";
+import DraftBadge from "../../../components/DraftBadge.astro";
 import { DEFAULT_LANGUAGE, ARTICLES_PER_PAGE } from "../../../../settings.ts";
 import type { LanguageLink } from "../../../types/languages";
 
@@ -65,6 +66,7 @@ const categoryHref = (slug: string) =>
             {page.data.map((entry) => (
               <li>
                 <a href={articleHref(entry.data.slug)}>{entry.data.title}</a>
+                <DraftBadge status={entry.data.status} />
               </li>
             ))}
           </ul>

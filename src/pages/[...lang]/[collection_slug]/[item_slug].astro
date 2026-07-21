@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../../layouts/Layout.astro";
+import DraftBadge from "../../../components/DraftBadge.astro";
 import { buildTranslationMap } from "../../../utils/translationMap";
 import {
   DEFAULT_LANGUAGE,
@@ -122,7 +123,7 @@ const getFieldType = (fieldName: string) => {
 
 <Layout pageTitle={item.title} links={translationLinks} currentLang={langCode}>
   <article class="stack">
-    <p class="muted">Collection: {collection.name}</p>
+    <p class="muted">Collection: {collection.name} <DraftBadge status={item.status} /></p>
 
     <p>
       <a href={urlBase}>&larr; Go back to {collection.name}</a>
